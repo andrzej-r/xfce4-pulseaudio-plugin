@@ -32,21 +32,19 @@
 #include "pulseaudio-button.h"
 
 #define V_MUTED  0
-#define V_ZERO   1
-#define V_LOW    2
-#define V_MEDIUM 3
-#define V_HIGH   4
+#define V_LOW    1
+#define V_MEDIUM 2
+#define V_HIGH   3
 
 #define STEP 0.06
 
 
 /* Icons for different volume levels */
 static const char *icons[] = {
-  "audio-volume-muted-panel",
-  "audio-volume-low-zero-panel",
-  "audio-volume-low-panel",
-  "audio-volume-medium-panel",
-  "audio-volume-high-panel",
+  "audio-volume-muted",
+  "audio-volume-low",
+  "audio-volume-medium",
+  "audio-volume-high",
   NULL
 };
 
@@ -76,6 +74,7 @@ struct _PulseaudioButton
 
   /* Icon size currently used */
   gint                  icon_size;
+  gint                  size;
 
   /* Array of preloaded icons */
   guint                 pixbuf_idx;
@@ -296,7 +295,7 @@ pulseaudio_button_update (PulseaudioButton *button,
   if (pulseaudio_volume_get_muted (button->volume))
     idx = V_MUTED;
   else if (volume <= 0.0)
-    idx = V_ZERO;
+    idx = V_MUTED;
   else if (volume <= 0.3)
     idx = V_LOW;
   else if (volume <= 0.7)
@@ -319,7 +318,7 @@ pulseaudio_button_set_size (PulseaudioButton *button,
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
   g_return_if_fail (size > 0);
 
-  button->icon_size = size - 2;
+  button->icon_size = size - 4;
   gtk_widget_set_size_request (GTK_WIDGET (button), size, size);
   pulseaudio_button_update_icons (button);
 }
