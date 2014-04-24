@@ -1,0 +1,3 @@
+panel-plugin/pulseaudio.desktop.in.in
+panel-plugin/pulseaudio.c
+panel-plugin/pulseaudio-dialog.glade
