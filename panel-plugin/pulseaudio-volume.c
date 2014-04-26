@@ -91,8 +91,8 @@ pulseaudio_volume_class_init (PulseaudioVolumeClass *klass)
                   G_TYPE_FROM_CLASS (gobject_class),
                   G_SIGNAL_RUN_LAST,
                   0, NULL, NULL,
-                  g_cclosure_marshal_VOID__DOUBLE,
-                  G_TYPE_NONE, 1, G_TYPE_DOUBLE);
+                  g_cclosure_marshal_VOID__VOID,
+                  G_TYPE_NONE, 0);
 
 }
 
@@ -143,14 +143,14 @@ pulseaudio_volume_sink_info_cb (pa_context         *context,
   if (volume->muted != muted)
     {
       volume->muted = muted;
-      g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0, volume->volume);
+      g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
       //g_debug ("Muted: %d", muted);
     }
 
   if (volume->volume != vol)
     {
       volume->volume = vol;
-      g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0, volume->volume);
+      g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
       //g_debug ("Volume: %f", vol);
     }
 }
@@ -305,10 +305,65 @@ pulseaudio_volume_d2v (gdouble vol)
 gboolean
 pulseaudio_volume_get_muted (PulseaudioVolume *volume)
 {
-  g_return_val_if_fail (IS_PULSEAUDIO_VOLUME (volume), 0.0);
+  g_return_val_if_fail (IS_PULSEAUDIO_VOLUME (volume), FALSE);
 
   return volume->muted;
 }
+
+
+
+/* muted setting callbacks */
+/* pa_context_success_cb_t */
+static void
+pulseaudio_volume_set_muted_cb2 (pa_context *context,
+                                 int         success,
+                                 void       *userdata)
+{
+  PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
+
+  if (success)
+    g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
+}
+
+/* pa_sink_info_cb_t */
+static void
+pulseaudio_volume_set_muted_cb1 (pa_context         *context,
+                                 const pa_sink_info *i,
+                                 int                 eol,
+                                 void               *userdata)
+{
+  PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
+  if (i == NULL) return;
+
+  pa_context_set_sink_mute_by_index (context, i->index, volume->muted, pulseaudio_volume_set_muted_cb2, volume);
+}
+
+
+
+void
+pulseaudio_volume_set_muted (PulseaudioVolume *volume,
+                             gboolean          muted)
+{
+  g_return_if_fail (IS_PULSEAUDIO_VOLUME (volume));
+  g_return_if_fail (pa_context_get_state (volume->pa_context) == PA_CONTEXT_READY);
+
+  if (volume->muted != muted)
+    {
+      volume->muted = muted;
+      pa_context_get_sink_info_list (volume->pa_context, pulseaudio_volume_set_muted_cb1, volume);
+    }
+}
+
+
+
+void
+pulseaudio_volume_toggle_muted (PulseaudioVolume *volume)
+{
+  g_return_if_fail (IS_PULSEAUDIO_VOLUME (volume));
+
+  pulseaudio_volume_set_muted (volume, !volume->muted);
+}
+
 
 
 
@@ -332,7 +387,7 @@ pulseaudio_volume_set_volume_cb3 (pa_context *context,
   PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
 
   if (success)
-    g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0, volume->volume);
+    g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
 }
 
 /* pa_sink_info_cb_t */

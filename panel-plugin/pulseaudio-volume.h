@@ -37,9 +37,13 @@ GType                   pulseaudio_volume_get_type        (void) G_GNUC_CONST;
 PulseaudioVolume       *pulseaudio_volume_new             ();
 
 gdouble                 pulseaudio_volume_get_volume      (PulseaudioVolume *volume);
-void                    pulseaudio_volume_set_volume      (PulseaudioVolume *volume, gdouble vol);
+void                    pulseaudio_volume_set_volume      (PulseaudioVolume *volume,
+                                                           gdouble           vol);
 
 gboolean                pulseaudio_volume_get_muted       (PulseaudioVolume *volume);
+void                    pulseaudio_volume_set_muted       (PulseaudioVolume *volume,
+                                                           gboolean          muted);
+void                    pulseaudio_volume_toggle_muted    (PulseaudioVolume *volume);
 
 G_END_DECLS
 

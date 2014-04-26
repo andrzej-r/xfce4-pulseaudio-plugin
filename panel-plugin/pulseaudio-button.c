@@ -211,7 +211,7 @@ pulseaudio_button_button_release (GtkWidget      *widget,
 
   if (event->button == 2) /* middle button */
     {
-      // toggle mute
+      pulseaudio_volume_toggle_muted (button->volume);
       return TRUE;
     }
 
