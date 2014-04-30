@@ -172,6 +172,18 @@ pulseaudio_volume_server_info_cb (pa_context           *context,
 
 
 static void
+pulseaudio_volume_sink_check (PulseaudioVolume *volume,
+                              pa_context       *context)
+{
+  g_return_if_fail (IS_PULSEAUDIO_VOLUME (volume));
+
+  pa_context_get_server_info (context, pulseaudio_volume_server_info_cb, volume);
+}
+
+
+
+
+static void
 pulseaudio_volume_subscribe_cb (pa_context                   *context,
                                 pa_subscription_event_type_t  t,
                                 uint32_t                      idx,
@@ -182,8 +194,8 @@ pulseaudio_volume_subscribe_cb (pa_context                   *context,
   switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK)
     {
     case PA_SUBSCRIPTION_EVENT_SINK          :
-      pa_context_get_server_info (context, pulseaudio_volume_server_info_cb, volume);
-      //g_debug ("PulseAudio sink event");
+      pulseaudio_volume_sink_check (volume, context);
+      g_debug ("PulseAudio sink event");
       break;
 
     case PA_SUBSCRIPTION_EVENT_SOURCE        :
@@ -217,6 +229,7 @@ pulseaudio_volume_context_state_cb (pa_context *context,
 
       g_debug ("PulseAudio connection established");
       volume->connected = TRUE;
+      pulseaudio_volume_sink_check (volume, context);
       break;
 
     case PA_CONTEXT_FAILED       :
