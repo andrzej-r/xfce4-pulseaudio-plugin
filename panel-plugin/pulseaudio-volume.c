@@ -103,6 +103,7 @@ pulseaudio_volume_init (PulseaudioVolume *volume)
 {
   volume->connected = FALSE;
   volume->volume = 0.0;
+  volume->muted = FALSE;
 
   volume->pa_mainloop = pa_glib_mainloop_new (NULL);
 
@@ -142,16 +143,16 @@ pulseaudio_volume_sink_info_cb (pa_context         *context,
 
   if (volume->muted != muted)
     {
+      g_debug ("Updated Mute: %d -> %d", volume->muted, muted);
       volume->muted = muted;
       g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
-      //g_debug ("Muted: %d", muted);
     }
 
-  if (volume->volume != vol)
+  if (ABS (volume->volume - vol) > 2e-3)
     {
+      g_debug ("Updated Volume: %04.3f -> %04.3f", volume->volume, vol);
       volume->volume = vol;
       g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
-      //g_debug ("Volume: %f", vol);
     }
 }
 
