@@ -284,6 +284,8 @@ pulseaudio_volume_v2d (pa_volume_t vol)
 
   volume = (gdouble) vol - PA_VOLUME_MUTED;
   volume /= (gdouble) (PA_VOLUME_NORM - PA_VOLUME_MUTED);
+  /* for safety */
+  volume = MIN (MAX (volume, 0.0), 1.0);
   return volume;
 }
 
@@ -296,6 +298,8 @@ pulseaudio_volume_d2v (gdouble vol)
 
   volume = (PA_VOLUME_NORM - PA_VOLUME_MUTED) * vol;
   volume = (pa_volume_t) volume + PA_VOLUME_MUTED;
+  /* for safety */
+  volume = MIN (MAX (volume, PA_VOLUME_MUTED), PA_VOLUME_NORM);
   return volume;
 }
 
