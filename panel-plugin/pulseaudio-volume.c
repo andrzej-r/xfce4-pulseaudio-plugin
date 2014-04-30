@@ -312,12 +312,12 @@ pulseaudio_volume_get_muted (PulseaudioVolume *volume)
 
 
 
-/* muted setting callbacks */
+/* final callback for volume/mute changes */
 /* pa_context_success_cb_t */
 static void
-pulseaudio_volume_set_muted_cb2 (pa_context *context,
-                                 int         success,
-                                 void       *userdata)
+pulseaudio_volume_sink_volume_changed (pa_context *context,
+                                       int         success,
+                                       void       *userdata)
 {
   PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
 
@@ -325,6 +325,7 @@ pulseaudio_volume_set_muted_cb2 (pa_context *context,
     g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
 }
 
+/* mute setting callbacks */
 /* pa_sink_info_cb_t */
 static void
 pulseaudio_volume_set_muted_cb1 (pa_context         *context,
@@ -335,7 +336,7 @@ pulseaudio_volume_set_muted_cb1 (pa_context         *context,
   PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
   if (i == NULL) return;
 
-  pa_context_set_sink_mute_by_index (context, i->index, volume->muted, pulseaudio_volume_set_muted_cb2, volume);
+  pa_context_set_sink_mute_by_index (context, i->index, volume->muted, pulseaudio_volume_sink_volume_changed, volume);
 }
 
 
@@ -378,18 +379,6 @@ pulseaudio_volume_get_volume (PulseaudioVolume *volume)
 
 
 /* volume setting callbacks */
-/* pa_context_success_cb_t */
-static void
-pulseaudio_volume_set_volume_cb3 (pa_context *context,
-                                  int         success,
-                                  void       *userdata)
-{
-  PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
-
-  if (success)
-    g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
-}
-
 /* pa_sink_info_cb_t */
 static void
 pulseaudio_volume_set_volume_cb2 (pa_context         *context,
@@ -404,7 +393,7 @@ pulseaudio_volume_set_volume_cb2 (pa_context         *context,
 
   //g_debug ("*** %s", pa_cvolume_snprint (st, sizeof (st), &i->volume));
   pa_cvolume_set (&i->volume, 1, pulseaudio_volume_d2v (volume->volume));
-  pa_context_set_sink_volume_by_index (context, i->index, &i->volume, pulseaudio_volume_set_volume_cb3, volume);
+  pa_context_set_sink_volume_by_index (context, i->index, &i->volume, pulseaudio_volume_sink_volume_changed, volume);
 }
 
 
