@@ -29,14 +29,13 @@
 #include <gtk/gtk.h>
 #include <libxfce4panel/libxfce4panel.h>
 
+#include "pulseaudio-plugin.h"
 #include "pulseaudio-button.h"
 
 #define V_MUTED  0
 #define V_LOW    1
 #define V_MEDIUM 2
 #define V_HIGH   3
-
-#define STEP 0.06
 
 
 /* Icons for different volume levels */
@@ -226,10 +225,7 @@ pulseaudio_button_scroll_event (GtkWidget *widget, GdkEventScroll *event)
   gdouble volume =  pulseaudio_volume_get_volume (button->volume);
   gdouble new_volume;
 
-  if (pulseaudio_volume_get_muted (button->volume))
-    volume = 0.0;
-
-  new_volume = MIN (MAX (volume + (1.0 - 2.0 * event->direction) * STEP, 0.0), 1.0);
+  new_volume = MIN (MAX (volume + (1.0 - 2.0 * event->direction) * VOLUME_STEP, 0.0), 1.0);
   pulseaudio_volume_set_volume (button->volume, new_volume);
   //g_debug ("dir: %d %f -> %f", event->direction, volume, new_volume);
 

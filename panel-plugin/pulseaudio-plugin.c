@@ -35,6 +35,7 @@
 #include <libxfce4panel/xfce-panel-plugin.h>
 
 #include "pulseaudio-plugin.h"
+#include "pulseaudio-config.h"
 #include "pulseaudio-volume.h"
 #include "pulseaudio-button.h"
 
@@ -42,14 +43,34 @@
 #include <libido/libido.h>
 #endif
 
+
+#ifdef HAVE_KEYBINDER
+#include <keybinder.h>
+
+#define PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY  "XF86AudioRaiseVolume"
+#define PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY  "XF86AudioLowerVolume"
+#define PULSEAUDIO_PLUGIN_MUTE_KEY          "XF86AudioMute"
+#endif
+
+
+
 /* prototypes */
 static void             pulseaudio_plugin_construct                        (XfcePanelPlugin       *plugin);
-static void             pulseaudio_plugin_free                             (XfcePanelPlugin       *plugin);
+static void             pulseaudio_plugin_free_data                        (XfcePanelPlugin       *plugin);
 static void             pulseaudio_plugin_show_about                       (XfcePanelPlugin       *plugin);
 static void             pulseaudio_plugin_configure_plugin                 (XfcePanelPlugin       *plugin);
 static gboolean         pulseaudio_plugin_size_changed                     (XfcePanelPlugin       *plugin,
                                                                             gint                   size);
 
+#ifdef HAVE_KEYBINDER
+static void             pulseaudio_plugin_bind_keys_cb                     (PulseaudioPlugin      *pulseaudio_plugin);
+static void             pulseaudio_plugin_bind_keys                        (PulseaudioPlugin      *pulseaudio_plugin,
+                                                                            gboolean               bind);
+static void             pulseaudio_plugin_volume_key_pressed               (const char            *keystring,
+                                                                            void                  *user_data);
+static void             pulseaudio_plugin_mute_pressed                     (const char            *keystring,
+                                                                            void                  *user_data);
+#endif
 
 struct _PulseaudioPluginClass
 {
@@ -61,6 +82,7 @@ struct _PulseaudioPlugin
 {
   XfcePanelPlugin      __parent__;
 
+  PulseaudioConfig    *config;
   PulseaudioVolume    *volume;
 
   /* panel widgets */
@@ -84,7 +106,7 @@ pulseaudio_plugin_class_init (PulseaudioPluginClass *klass)
 
   plugin_class = XFCE_PANEL_PLUGIN_CLASS (klass);
   plugin_class->construct = pulseaudio_plugin_construct;
-  plugin_class->free_data = pulseaudio_plugin_free;
+  plugin_class->free_data = pulseaudio_plugin_free_data;
   plugin_class->about = pulseaudio_plugin_show_about;
   plugin_class->configure_plugin = pulseaudio_plugin_configure_plugin;
   plugin_class->size_changed = pulseaudio_plugin_size_changed;
@@ -105,8 +127,14 @@ pulseaudio_plugin_init (PulseaudioPlugin *pulseaudio_plugin)
 
 
 static void
-pulseaudio_plugin_free (XfcePanelPlugin *plugin)
+pulseaudio_plugin_free_data (XfcePanelPlugin *plugin)
 {
+  PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (plugin);
+
+#ifdef HAVE_KEYBINDER
+  if (pulseaudio_config_get_enable_keyboard_shortcuts (pulseaudio_plugin->config))
+    pulseaudio_plugin_bind_keys (pulseaudio_plugin, FALSE);
+#endif
 }
 
 
@@ -114,29 +142,30 @@ pulseaudio_plugin_free (XfcePanelPlugin *plugin)
 static void
 pulseaudio_plugin_show_about (XfcePanelPlugin *plugin)
 {
-   GdkPixbuf *icon;
+  GdkPixbuf *icon;
 
-   const gchar *auth[] =
-     {
-       "Andrzej Radecki <ndrwrdck@gmail.com>",
-       NULL
-     };
+  const gchar *auth[] =
+    {
+      "Andrzej Radecki <ndrwrdck@gmail.com>",
+      NULL
+    };
 
-   g_return_if_fail (IS_PULSEAUDIO_PLUGIN (plugin));
+  g_return_if_fail (IS_PULSEAUDIO_PLUGIN (plugin));
 
-   icon = xfce_panel_pixbuf_from_source ("xfce4-pulseaudio-plugin", NULL, 32);
-   gtk_show_about_dialog (NULL,
-                          "logo", icon,
-                          "license", xfce_get_license_text (XFCE_LICENSE_TEXT_GPL),
-                          "version", PACKAGE_VERSION,
-                          "program-name", PACKAGE_NAME,
-                          "comments", _("A panel plugin for controlling PulseAudio mixer."),
-                          "website", "http://goodies.xfce.org/projects/panel-plugins/xfce4-pulseaudio-plugin",
-                          "copyright", _("Copyright (c) 2014\n"),
-                          "authors", auth, NULL);
+  icon = xfce_panel_pixbuf_from_source ("xfce4-pulseaudio-plugin", NULL, 32);
+  gtk_show_about_dialog (NULL,
+                         "logo",         icon,
+                         "license",      xfce_get_license_text (XFCE_LICENSE_TEXT_GPL),
+                         "version",      PACKAGE_VERSION,
+                         "program-name", PACKAGE_NAME,
+                         "comments",     _("A panel plugin for controlling PulseAudio mixer."),
+                         "website",      "http://goodies.xfce.org/projects/panel-plugins/xfce4-pulseaudio-plugin",
+                         "copyright",    _("Copyright (c) 2014\n"),
+                         "authors",      auth,
+                         NULL);
 
-   if (icon)
-     g_object_unref (G_OBJECT (icon));
+  if (icon)
+    g_object_unref (G_OBJECT (icon));
 }
 
 
@@ -210,14 +239,77 @@ pulseaudio_plugin_size_changed (XfcePanelPlugin *plugin,
 
 
 
+#ifdef HAVE_KEYBINDER
+static void
+pulseaudio_plugin_bind_keys_cb (PulseaudioPlugin      *pulseaudio_plugin)
+{
+  g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
+
+  pulseaudio_plugin_bind_keys (pulseaudio_plugin, pulseaudio_config_get_enable_keyboard_shortcuts (pulseaudio_plugin->config));
+}
+
+
+static void
+pulseaudio_plugin_bind_keys (PulseaudioPlugin      *pulseaudio_plugin,
+                             gboolean               bind)
+{
+  g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
+
+  g_debug ("pulseaudio_plugin_bind_keys: %d", bind);
+
+  if (bind)
+    {
+      keybinder_bind (PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed, pulseaudio_plugin);
+      keybinder_bind (PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed, pulseaudio_plugin);
+      keybinder_bind (PULSEAUDIO_PLUGIN_MUTE_KEY, pulseaudio_plugin_mute_pressed, pulseaudio_plugin);
+    }
+  else
+    {
+      keybinder_unbind (PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed);
+      keybinder_unbind (PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed);
+      keybinder_unbind (PULSEAUDIO_PLUGIN_MUTE_KEY, pulseaudio_plugin_mute_pressed);
+    }
+}
+
+
+static void
+pulseaudio_plugin_volume_key_pressed (const char            *keystring,
+                                      void                  *user_data)
+{
+  PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (user_data);
+  gdouble           volume            = pulseaudio_volume_get_volume (pulseaudio_plugin->volume);
+  gdouble           new_volume;
+
+  g_debug ("%s pressed", keystring);
+
+  if (strcmp (keystring, PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY) == 0)
+    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume + VOLUME_STEP, 0.0), 1.0));
+  else if (strcmp (keystring, PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY) == 0)
+    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume - VOLUME_STEP, 0.0), 1.0));
+}
+
+
+static void
+pulseaudio_plugin_mute_pressed (const char            *keystring,
+                                void                  *user_data)
+{
+  PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (user_data);
+
+  g_debug ("%s pressed", keystring);
+
+  pulseaudio_volume_toggle_muted (pulseaudio_plugin->volume);
+}
+#endif
+
+
 static void
 pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
 {
   PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (plugin);
 
-  #ifdef HAVE_IDO
+#ifdef HAVE_IDO
   ido_init();
-  #endif
+#endif
 
   xfce_panel_plugin_menu_show_configure (plugin);
   xfce_panel_plugin_menu_show_about (plugin);
@@ -231,10 +323,18 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
   g_log_set_default_handler (pulseaudio_plugin_log_handler, plugin);
 
   /* initialize xfconf */
-  //pulseaudio_plugin->config = pulseaudio_config_new (xfce_panel_plugin_get_property_base (plugin));
+  pulseaudio_plugin->config = pulseaudio_config_new (xfce_panel_plugin_get_property_base (plugin));
 
   /* instantiate preference dialog builder */
   //pulseaudio_plugin->dialog = pulseaudio_dialog_new (pulseaudio_plugin->config);
+
+#ifdef HAVE_KEYBINDER
+  /* Initialize libkeybinder */
+  keybinder_init ();
+  g_signal_connect (G_OBJECT (pulseaudio_plugin->config), "notify::enable-keyboard-shortcuts",
+                    G_CALLBACK (pulseaudio_plugin_bind_keys_cb), pulseaudio_plugin);
+  pulseaudio_plugin_bind_keys (pulseaudio_plugin, pulseaudio_config_get_enable_keyboard_shortcuts (pulseaudio_plugin->config));
+#endif
 
   /* volume controller */
   pulseaudio_plugin->volume = pulseaudio_volume_new ();
@@ -243,5 +343,7 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
   pulseaudio_plugin->button = pulseaudio_button_new (pulseaudio_plugin->volume);
   gtk_container_add (GTK_CONTAINER (plugin), GTK_WIDGET (pulseaudio_plugin->button));
   gtk_widget_show (GTK_WIDGET (pulseaudio_plugin->button));
+
+
 }
 

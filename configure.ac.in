@@ -91,6 +91,12 @@ dnl *** Optional IDO library ***
 dnl ****************************
 XDT_CHECK_OPTIONAL_PACKAGE([IDO], [libido3-0.1], [13.10.0], [ido], [IDO library])
 
+dnl **********************************
+dnl *** Optional keybinder Support ***
+dnl **********************************
+XDT_CHECK_OPTIONAL_PACKAGE([KEYBINDER], [keybinder-3.0], [0.2.2], [keybinder],
+                           [keybinder Support])
+
 dnl ***********************************
 dnl *** Check for debugging support ***
 dnl ***********************************
@@ -126,9 +132,6 @@ echo
 echo "Build Configuration:"
 echo
 echo "* Debug Support:        $enable_debug"
-if test x"$IDO_FOUND" = x"yes"; then
-echo "* Use IDO library:      yes"
-else
-echo "* Use IDO library:      no"
-fi
+echo "* Use keybinder:        ${KEYBINDER_FOUND:-no}"
+echo "* Use IDO library:      ${IDO_FOUND:-no}"
 echo

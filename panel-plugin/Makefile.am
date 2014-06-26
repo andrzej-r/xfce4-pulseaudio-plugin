@@ -23,6 +23,8 @@ libpulseaudio_plugin_la_SOURCES = \
 	pulseaudio-volume.h \
 	pulseaudio-button.c \
 	pulseaudio-button.h \
+	pulseaudio-config.c \
+	pulseaudio-config.h \
 	pulseaudio-plugin.c \
 	pulseaudio-plugin.h
 
@@ -35,6 +37,7 @@ libpulseaudio_plugin_la_CFLAGS = \
 	$(LIBXFCE4PANEL_CFLAGS) \
 	$(XFCONF_CFLAGS) \
 	$(IDO_CFLAGS) \
+	$(KEYBINDER_CFLAGS) \
 	$(PLATFORM_CFLAGS) \
 	-DDATADIR=\""$(datadir)"\"
 
@@ -53,7 +56,8 @@ libpulseaudio_plugin_la_LIBADD = \
 	$(LIBXFCE4UI_LIBS) \
 	$(LIBXFCE4PANEL_LIBS) \
 	$(XFCONF_LIBS) \
-	$(IDO_LIBS)
+	$(IDO_LIBS) \
+	$(KEYBINDER_LIBS)
 
 #
 # Desktop file
