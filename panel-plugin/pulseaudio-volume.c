@@ -166,6 +166,7 @@ pulseaudio_volume_server_info_cb (pa_context           *context,
   PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
   if (i == NULL) return;
 
+  g_debug ("default sink name = %s\n", i->default_sink_name);
   pa_context_get_sink_info_by_name (context, i->default_sink_name, pulseaudio_volume_sink_info_cb, volume);
 }
 
