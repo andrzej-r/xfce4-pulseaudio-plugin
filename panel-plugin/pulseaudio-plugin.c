@@ -1,4 +1,4 @@
-/*  Copyright (c) 2014 Andrzej <ndrwrdck@gmail.com>
+/*  Copyright (c) 2014-2015 Andrzej <ndrwrdck@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@
 #include "pulseaudio-config.h"
 #include "pulseaudio-volume.h"
 #include "pulseaudio-button.h"
+#include "pulseaudio-dialog.h"
 
 #ifdef HAVE_IDO
 #include <libido/libido.h>
@@ -63,9 +64,10 @@ static gboolean         pulseaudio_plugin_size_changed                     (Xfce
                                                                             gint                   size);
 
 #ifdef HAVE_KEYBINDER
-static void             pulseaudio_plugin_bind_keys_cb                     (PulseaudioPlugin      *pulseaudio_plugin);
-static void             pulseaudio_plugin_bind_keys                        (PulseaudioPlugin      *pulseaudio_plugin,
-                                                                            gboolean               bind);
+static void             pulseaudio_plugin_bind_keys_cb                     (PulseaudioPlugin      *pulseaudio_plugin,
+                                                                            PulseaudioConfig      *pulseaudio_config);
+static gboolean         pulseaudio_plugin_bind_keys                        (PulseaudioPlugin      *pulseaudio_plugin);
+static void             pulseaudio_plugin_unbind_keys                      (PulseaudioPlugin      *pulseaudio_plugin);
 static void             pulseaudio_plugin_volume_key_pressed               (const char            *keystring,
                                                                             void                  *user_data);
 static void             pulseaudio_plugin_mute_pressed                     (const char            *keystring,
@@ -87,6 +89,9 @@ struct _PulseaudioPlugin
 
   /* panel widgets */
   GtkWidget           *button;
+
+  /* config dialog builder */
+  PulseaudioDialog    *dialog;
 
   /* log file */
   FILE                *logfile;
@@ -132,8 +137,8 @@ pulseaudio_plugin_free_data (XfcePanelPlugin *plugin)
   PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (plugin);
 
 #ifdef HAVE_KEYBINDER
-  if (pulseaudio_config_get_enable_keyboard_shortcuts (pulseaudio_plugin->config))
-    pulseaudio_plugin_bind_keys (pulseaudio_plugin, FALSE);
+  /* release keybindings */
+  pulseaudio_plugin_unbind_keys (pulseaudio_plugin);
 #endif
 }
 
@@ -175,7 +180,7 @@ pulseaudio_plugin_configure_plugin (XfcePanelPlugin *plugin)
 {
   PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (plugin);
 
-  //pulseaudio_dialog_show (pulseaudio_plugin->dialog, gtk_widget_get_screen (GTK_WIDGET (plugin)));
+  pulseaudio_dialog_show (pulseaudio_plugin->dialog, gtk_widget_get_screen (GTK_WIDGET (plugin)));
 }
 
 
@@ -241,34 +246,45 @@ pulseaudio_plugin_size_changed (XfcePanelPlugin *plugin,
 
 #ifdef HAVE_KEYBINDER
 static void
-pulseaudio_plugin_bind_keys_cb (PulseaudioPlugin      *pulseaudio_plugin)
+pulseaudio_plugin_bind_keys_cb (PulseaudioPlugin      *pulseaudio_plugin,
+                                PulseaudioConfig      *pulseaudio_config)
 {
   g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
 
-  pulseaudio_plugin_bind_keys (pulseaudio_plugin, pulseaudio_config_get_enable_keyboard_shortcuts (pulseaudio_plugin->config));
+  if (pulseaudio_config_get_enable_keyboard_shortcuts (pulseaudio_plugin->config))
+    pulseaudio_plugin_bind_keys (pulseaudio_plugin);
+  else
+    pulseaudio_plugin_unbind_keys (pulseaudio_plugin);
+}
+
+
+static gboolean
+pulseaudio_plugin_bind_keys (PulseaudioPlugin      *pulseaudio_plugin)
+{
+  gboolean success;
+  g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
+  g_debug ("Grabbing volume control keys");
+
+  success = (keybinder_bind (PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed, pulseaudio_plugin) &&
+             keybinder_bind (PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed, pulseaudio_plugin) &&
+             keybinder_bind (PULSEAUDIO_PLUGIN_MUTE_KEY, pulseaudio_plugin_mute_pressed, pulseaudio_plugin));
+
+  if (!success)
+    g_warning ("Could not have grabbed volume control keys. Is another volume control application (xfce4-volumed) running?");
+
+  return success;
 }
 
 
 static void
-pulseaudio_plugin_bind_keys (PulseaudioPlugin      *pulseaudio_plugin,
-                             gboolean               bind)
+pulseaudio_plugin_unbind_keys (PulseaudioPlugin      *pulseaudio_plugin)
 {
   g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
+  g_debug ("Releasing volume control keys");
 
-  g_debug ("pulseaudio_plugin_bind_keys: %d", bind);
-
-  if (bind)
-    {
-      keybinder_bind (PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed, pulseaudio_plugin);
-      keybinder_bind (PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed, pulseaudio_plugin);
-      keybinder_bind (PULSEAUDIO_PLUGIN_MUTE_KEY, pulseaudio_plugin_mute_pressed, pulseaudio_plugin);
-    }
-  else
-    {
-      keybinder_unbind (PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed);
-      keybinder_unbind (PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed);
-      keybinder_unbind (PULSEAUDIO_PLUGIN_MUTE_KEY, pulseaudio_plugin_mute_pressed);
-    }
+  keybinder_unbind (PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed);
+  keybinder_unbind (PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed);
+  keybinder_unbind (PULSEAUDIO_PLUGIN_MUTE_KEY, pulseaudio_plugin_mute_pressed);
 }
 
 
@@ -326,14 +342,17 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
   pulseaudio_plugin->config = pulseaudio_config_new (xfce_panel_plugin_get_property_base (plugin));
 
   /* instantiate preference dialog builder */
-  //pulseaudio_plugin->dialog = pulseaudio_dialog_new (pulseaudio_plugin->config);
+  pulseaudio_plugin->dialog = pulseaudio_dialog_new (pulseaudio_plugin->config);
 
 #ifdef HAVE_KEYBINDER
   /* Initialize libkeybinder */
   keybinder_init ();
-  g_signal_connect (G_OBJECT (pulseaudio_plugin->config), "notify::enable-keyboard-shortcuts",
-                    G_CALLBACK (pulseaudio_plugin_bind_keys_cb), pulseaudio_plugin);
-  pulseaudio_plugin_bind_keys (pulseaudio_plugin, pulseaudio_config_get_enable_keyboard_shortcuts (pulseaudio_plugin->config));
+  g_signal_connect_swapped (G_OBJECT (pulseaudio_plugin->config), "notify::enable-keyboard-shortcuts",
+                            G_CALLBACK (pulseaudio_plugin_bind_keys_cb), pulseaudio_plugin);
+  if (pulseaudio_config_get_enable_keyboard_shortcuts (pulseaudio_plugin->config))
+    pulseaudio_plugin_bind_keys (pulseaudio_plugin);
+  else
+    pulseaudio_plugin_unbind_keys (pulseaudio_plugin);
 #endif
 
   /* volume controller */

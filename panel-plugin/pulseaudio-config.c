@@ -184,7 +184,6 @@ pulseaudio_config_set_property (GObject      *object,
       if (config->enable_keyboard_shortcuts != val)
         {
           config->enable_keyboard_shortcuts = val;
-          printf ("********** NOTIFY %d\n", val);
           g_object_notify (G_OBJECT (config), "enable-keyboard-shortcuts");
           g_signal_emit (G_OBJECT (config), pulseaudio_config_signals [CONFIGURATION_CHANGED], 0);
         }

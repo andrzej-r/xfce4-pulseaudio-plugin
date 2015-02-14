@@ -26,7 +26,10 @@ libpulseaudio_plugin_la_SOURCES = \
 	pulseaudio-config.c \
 	pulseaudio-config.h \
 	pulseaudio-plugin.c \
-	pulseaudio-plugin.h
+	pulseaudio-plugin.h \
+	pulseaudio-dialog.c \
+	pulseaudio-dialog.h
+
 
 libpulseaudio_plugin_la_CFLAGS = \
 	$(PULSEAUDIO_CFLAGS) \
@@ -86,7 +89,7 @@ DISTCLEANFILES += \
 	$(libpulseaudio_built_sources)
 
 pulseaudio-dialog_ui.h: pulseaudio-dialog.glade
-	$(AM_V_GEN) xdt-csource --static --strip-comments --strip-content --name=pulseaudio-dialog_ui $< >$@
+	$(AM_V_GEN) xdt-csource --static --strip-comments --strip-content --name=pulseaudio_dialog_ui $< >$@
 endif
 
 # vi:set ts=8 sw=8 noet ai nocindent syntax=automake:
