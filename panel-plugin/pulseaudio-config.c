@@ -46,6 +46,7 @@
 
 
 #define DEFAULT_ENABLE_KEYBOARD_SHORTCUTS         TRUE
+#define DEFAULT_VOLUME_STEP                       6
 
 
 
@@ -64,7 +65,7 @@ static void                 pulseaudio_config_set_property   (GObject          *
 
 struct _PulseaudioConfigClass
 {
-  GObjectClass      __parent__;
+  GObjectClass     __parent__;
 };
 
 struct _PulseaudioConfig
@@ -72,6 +73,7 @@ struct _PulseaudioConfig
   GObject          __parent__;
 
   gboolean         enable_keyboard_shortcuts;
+  guint            volume_step;
 };
 
 
@@ -80,6 +82,7 @@ enum
   {
     PROP_0,
     PROP_ENABLE_KEYBOARD_SHORTCUTS,
+    PROP_VOLUME_STEP,
     N_PROPERTIES,
   };
 
@@ -115,6 +118,15 @@ pulseaudio_config_class_init (PulseaudioConfigClass *klass)
 
 
 
+  g_object_class_install_property (gobject_class,
+                                   PROP_VOLUME_STEP,
+                                   g_param_spec_uint ("volume-step", NULL, NULL,
+                                                      1, 50, DEFAULT_VOLUME_STEP,
+                                                      G_PARAM_READWRITE |
+                                                      G_PARAM_STATIC_STRINGS));
+
+
+
   pulseaudio_config_signals[CONFIGURATION_CHANGED] =
     g_signal_new (g_intern_static_string ("configuration-changed"),
                   G_TYPE_FROM_CLASS (gobject_class),
@@ -130,6 +142,7 @@ static void
 pulseaudio_config_init (PulseaudioConfig *config)
 {
   config->enable_keyboard_shortcuts = DEFAULT_ENABLE_KEYBOARD_SHORTCUTS;
+  config->volume_step               = DEFAULT_VOLUME_STEP;
 }
 
 
@@ -160,6 +173,10 @@ pulseaudio_config_get_property (GObject    *object,
       g_value_set_boolean (value, config->enable_keyboard_shortcuts);
       break;
 
+    case PROP_VOLUME_STEP:
+      g_value_set_uint (value, config->volume_step);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -175,16 +192,27 @@ pulseaudio_config_set_property (GObject      *object,
                                 GParamSpec   *pspec)
 {
   PulseaudioConfig     *config = PULSEAUDIO_CONFIG (object);
-  gint                  val;
+  guint                 val_uint;
+  gboolean              val_bool;
 
   switch (prop_id)
     {
     case PROP_ENABLE_KEYBOARD_SHORTCUTS:
-      val = g_value_get_boolean (value);
-      if (config->enable_keyboard_shortcuts != val)
+      val_bool = g_value_get_boolean (value);
+      if (config->enable_keyboard_shortcuts != val_bool)
         {
-          config->enable_keyboard_shortcuts = val;
+          config->enable_keyboard_shortcuts = val_bool;
           g_object_notify (G_OBJECT (config), "enable-keyboard-shortcuts");
+          g_signal_emit (G_OBJECT (config), pulseaudio_config_signals [CONFIGURATION_CHANGED], 0);
+        }
+      break;
+
+    case PROP_VOLUME_STEP:
+      val_uint = g_value_get_uint (value);
+      if (config->volume_step != val_uint)
+        {
+          config->volume_step = val_uint;
+          g_object_notify (G_OBJECT (config), "volume-step");
           g_signal_emit (G_OBJECT (config), pulseaudio_config_signals [CONFIGURATION_CHANGED], 0);
         }
       break;
@@ -209,6 +237,17 @@ pulseaudio_config_get_enable_keyboard_shortcuts (PulseaudioConfig *config)
 
 
 
+guint
+pulseaudio_config_get_volume_step (PulseaudioConfig *config)
+{
+  g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), DEFAULT_ENABLE_KEYBOARD_SHORTCUTS);
+
+  return config->volume_step;
+}
+
+
+
+
 PulseaudioConfig *
 pulseaudio_config_new (const gchar     *property_base)
 {
@@ -224,6 +263,10 @@ pulseaudio_config_new (const gchar     *property_base)
 
       property = g_strconcat (property_base, "/enable-keyboard-shortcuts", NULL);
       xfconf_g_property_bind (channel, property, G_TYPE_BOOLEAN, config, "enable-keyboard-shortcuts");
+      g_free (property);
+
+      property = g_strconcat (property_base, "/volume-step", NULL);
+      xfconf_g_property_bind (channel, property, G_TYPE_UINT, config, "volume-step");
       g_free (property);
 
       g_object_notify (G_OBJECT (config), "enable-keyboard-shortcuts");

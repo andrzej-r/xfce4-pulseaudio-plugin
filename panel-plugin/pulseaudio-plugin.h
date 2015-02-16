@@ -22,8 +22,6 @@
 #include <gtk/gtk.h>
 #include <libxfce4panel/libxfce4panel.h>
 
-#define VOLUME_STEP 0.06
-
 G_BEGIN_DECLS
 typedef struct _PulseaudioPluginClass PulseaudioPluginClass;
 typedef struct _PulseaudioPlugin      PulseaudioPlugin;

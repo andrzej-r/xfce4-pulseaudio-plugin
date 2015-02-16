@@ -30,6 +30,7 @@
 #include <libxfce4panel/libxfce4panel.h>
 
 #include "pulseaudio-plugin.h"
+#include "pulseaudio-config.h"
 #include "pulseaudio-button.h"
 
 #define V_MUTED  0
@@ -67,6 +68,7 @@ struct _PulseaudioButton
 {
   GtkToggleButton       __parent__;
 
+  PulseaudioConfig     *config;
   PulseaudioVolume     *volume;
 
   GtkWidget            *image;
@@ -137,6 +139,7 @@ pulseaudio_button_init (PulseaudioButton *button)
   /* Intercept scroll events */
   gtk_widget_add_events (GTK_WIDGET (button), GDK_SCROLL_MASK);
 
+  button->config = NULL;
   button->volume = NULL;
 
   button->menu = NULL;
@@ -223,9 +226,11 @@ pulseaudio_button_scroll_event (GtkWidget *widget, GdkEventScroll *event)
 {
   PulseaudioButton *button = PULSEAUDIO_BUTTON (widget);
   gdouble volume =  pulseaudio_volume_get_volume (button->volume);
+  gdouble volume_step = pulseaudio_config_get_volume_step (button->config) / 100.0;
   gdouble new_volume;
 
-  new_volume = MIN (MAX (volume + (1.0 - 2.0 * event->direction) * VOLUME_STEP, 0.0), 1.0);
+
+  new_volume = MIN (MAX (volume + (1.0 - 2.0 * event->direction) * volume_step, 0.0), 1.0);
   pulseaudio_volume_set_volume (button->volume, new_volume);
   //g_debug ("dir: %d %f -> %f", event->direction, volume, new_volume);
 
@@ -333,7 +338,8 @@ pulseaudio_button_volume_changed (PulseaudioButton  *button,
 
 
 GtkWidget *
-pulseaudio_button_new (PulseaudioVolume *volume)
+pulseaudio_button_new (PulseaudioConfig *config,
+                       PulseaudioVolume *volume)
 {
   PulseaudioButton *button;
 
@@ -342,6 +348,7 @@ pulseaudio_button_new (PulseaudioVolume *volume)
   button = g_object_new (TYPE_PULSEAUDIO_BUTTON, NULL);
 
   button->volume = volume;
+  button->config = config;
   button->volume_changed_id =
     g_signal_connect_swapped (G_OBJECT (button->volume), "volume-changed",
                               G_CALLBACK (pulseaudio_button_volume_changed), button);

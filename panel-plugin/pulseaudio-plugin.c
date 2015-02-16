@@ -294,14 +294,15 @@ pulseaudio_plugin_volume_key_pressed (const char            *keystring,
 {
   PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (user_data);
   gdouble           volume            = pulseaudio_volume_get_volume (pulseaudio_plugin->volume);
+  gdouble           volume_step       = pulseaudio_config_get_volume_step (pulseaudio_plugin->config) / 100.0;
   gdouble           new_volume;
 
   g_debug ("%s pressed", keystring);
 
   if (strcmp (keystring, PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY) == 0)
-    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume + VOLUME_STEP, 0.0), 1.0));
+    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume + volume_step, 0.0), 1.0));
   else if (strcmp (keystring, PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY) == 0)
-    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume - VOLUME_STEP, 0.0), 1.0));
+    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume - volume_step, 0.0), 1.0));
 }
 
 
@@ -359,7 +360,8 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
   pulseaudio_plugin->volume = pulseaudio_volume_new ();
 
   /* instantiate a button box */
-  pulseaudio_plugin->button = pulseaudio_button_new (pulseaudio_plugin->volume);
+  pulseaudio_plugin->button = pulseaudio_button_new (pulseaudio_plugin->config,
+                                                     pulseaudio_plugin->volume);
   gtk_container_add (GTK_CONTAINER (plugin), GTK_WIDGET (pulseaudio_plugin->button));
   gtk_widget_show (GTK_WIDGET (pulseaudio_plugin->button));
 

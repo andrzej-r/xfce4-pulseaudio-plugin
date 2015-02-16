@@ -39,6 +39,7 @@ GType              pulseaudio_config_get_type                       (void)      
 PulseaudioConfig  *pulseaudio_config_new                            (const gchar          *property_base);
 
 gboolean           pulseaudio_config_get_enable_keyboard_shortcuts  (PulseaudioConfig     *config);
+guint              pulseaudio_config_get_volume_step                (PulseaudioConfig     *config);
 
 G_END_DECLS
 
