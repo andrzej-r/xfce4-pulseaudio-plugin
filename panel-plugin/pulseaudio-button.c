@@ -320,8 +320,10 @@ pulseaudio_button_update (PulseaudioButton *button,
     idx = V_HIGH;
 
   if (muted)
+    //tip_text = g_strdup_printf (_("Volume %d%% (muted)"), (gint) round (volume * 100));
     tip_text = g_strdup_printf (("Volume %d%% (muted)"), (gint) round (volume * 100));
   else
+    //tip_text = g_strdup_printf (_("Volume %d%%"), (gint) round (volume * 100));
     tip_text = g_strdup_printf (("Volume %d%%"), (gint) round (volume * 100));
   gtk_widget_set_tooltip_text (GTK_WIDGET (button), tip_text);
   g_free (tip_text);
