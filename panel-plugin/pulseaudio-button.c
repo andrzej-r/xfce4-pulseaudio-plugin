@@ -25,6 +25,15 @@
 
 
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_MATH_H
+#include <math.h>
+#endif
+
+
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <libxfce4panel/libxfce4panel.h>
@@ -149,6 +158,8 @@ pulseaudio_button_init (PulseaudioButton *button)
   button->image = xfce_panel_image_new ();
   gtk_container_add (GTK_CONTAINER (button), button->image);
   gtk_widget_show (button->image);
+
+  g_object_set (G_OBJECT (button), "has-tooltip", TRUE, NULL);
 
   pulseaudio_button_update (button, TRUE);
 
@@ -287,13 +298,16 @@ static void
 pulseaudio_button_update (PulseaudioButton *button,
                           gboolean          force_update)
 {
-  guint   idx;
-  gdouble volume;
+  guint     idx;
+  gdouble   volume;
+  gboolean  muted;
+  gchar    *tip_text;
 
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
 
   volume = pulseaudio_volume_get_volume (button->volume);
-  if (pulseaudio_volume_get_muted (button->volume))
+  muted = pulseaudio_volume_get_muted (button->volume);
+  if (muted)
     idx = V_MUTED;
   else if (volume <= 0.0)
     idx = V_MUTED;
@@ -303,6 +317,13 @@ pulseaudio_button_update (PulseaudioButton *button,
     idx = V_MEDIUM;
   else
     idx = V_HIGH;
+
+  if (muted)
+    tip_text = g_strdup_printf (("Volume %d%% (muted)"), (gint) round (volume * 100));
+  else
+    tip_text = g_strdup_printf (("Volume %d%%"), (gint) round (volume * 100));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (button), tip_text);
+  g_free (tip_text);
 
   if (force_update || button->pixbuf_idx != idx)
     {
