@@ -6,7 +6,7 @@
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">xfce4-indicator-plugin</property>
+    <property name="icon_name">xfce4-pulseaudio-plugin</property>
   </object>
   <object class="XfceTitledDialog" id="dialog">
     <property name="can_focus">False</property>
@@ -91,7 +91,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">If enabled, ensure that the indicators are laid out in a single row or column.</property>
+                            <property name="tooltip_text" translatable="yes">Enables volume control using multimedia keys. Make sure no other application that listens to these keys (e.g. xfce4-volumed) is running in the background.</property>
                             <property name="use_underline">True</property>
                             <property name="draw_indicator">True</property>
                           </object>
