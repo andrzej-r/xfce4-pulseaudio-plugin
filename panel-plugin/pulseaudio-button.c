@@ -199,16 +199,15 @@ pulseaudio_button_button_press (GtkWidget      *widget,
 {
   PulseaudioButton *button = PULSEAUDIO_BUTTON (widget);
 
-  if(event->button == 1 && button->menu != NULL) /* left click only */
+  if(event->button == 1) /* left button */
     {
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget),TRUE);
-      //button->deactivate_id = g_signal_connect_swapped
-      //  (G_OBJECT (button->menu), "deactivate",
-      //   G_CALLBACK (pulseaudio_button_menu_deactivate), button);
-      //gtk_menu_reposition (GTK_MENU (button->menu));
-      //gtk_menu_popup (button->menu, NULL, NULL,
-      //                xfce_panel_plugin_position_menu, button->plugin,
-      //                event->button, event->time);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
+      return TRUE;
+    }
+
+  if(event->button == 2) /* middle button */
+    {
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
       return TRUE;
     }
 
@@ -221,6 +220,8 @@ pulseaudio_button_button_release (GtkWidget      *widget,
                                   GdkEventButton *event)
 {
   PulseaudioButton *button = PULSEAUDIO_BUTTON (widget);
+
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
   if (event->button == 2) /* middle button */
     {
