@@ -36,6 +36,7 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
 
 #include "pulseaudio-plugin.h"
@@ -230,7 +231,7 @@ pulseaudio_button_button_release (GtkWidget      *widget,
                                               pulseaudio_config_get_mixer_name (button->config),
                                               FALSE, FALSE, &error))
         {
-          xfce_dialog_show_error (NULL, error, ("Failed to execute command \"%s\"."),
+          xfce_dialog_show_error (NULL, error, _("Failed to execute command \"%s\"."),
                                   pulseaudio_config_get_mixer_name (button->config));
           g_error_free (error);
         }
@@ -334,11 +335,9 @@ pulseaudio_button_update (PulseaudioButton *button,
     idx = V_HIGH;
 
   if (muted)
-    //tip_text = g_strdup_printf (_("Volume %d%% (muted)"), (gint) round (volume * 100));
-    tip_text = g_strdup_printf (("Volume %d%% (muted)"), (gint) round (volume * 100));
+    tip_text = g_strdup_printf (_("Volume %d%% (muted)"), (gint) round (volume * 100));
   else
-    //tip_text = g_strdup_printf (_("Volume %d%%"), (gint) round (volume * 100));
-    tip_text = g_strdup_printf (("Volume %d%%"), (gint) round (volume * 100));
+    tip_text = g_strdup_printf (_("Volume %d%%"), (gint) round (volume * 100));
   gtk_widget_set_tooltip_text (GTK_WIDGET (button), tip_text);
   g_free (tip_text);
 

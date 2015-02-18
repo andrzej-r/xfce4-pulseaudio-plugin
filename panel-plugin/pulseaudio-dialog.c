@@ -33,6 +33,9 @@
 #include <string.h>
 #endif
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4ui/libxfce4ui.h>
 //#include <exo/exo.h>
@@ -125,7 +128,7 @@ pulseaudio_dialog_run_mixer (PulseaudioDialog *dialog,
                                           pulseaudio_config_get_mixer_name (dialog->config),
                                           FALSE, FALSE, &error))
     {
-      xfce_dialog_show_error (NULL, error, ("Failed to execute command \"%s\"."),
+      xfce_dialog_show_error (NULL, error, _("Failed to execute command \"%s\"."),
                               pulseaudio_config_get_mixer_name (dialog->config));
       g_error_free (error);
     }
@@ -186,7 +189,7 @@ pulseaudio_dialog_build (PulseaudioDialog *dialog)
     }
   else
     {
-      g_critical ("Faild to construct the builder: %s.",
+      g_critical ("Failed to construct the builder: %s.",
                   error->message);
       g_error_free (error);
     }
@@ -213,7 +216,7 @@ pulseaudio_dialog_help_button_clicked (PulseaudioDialog *dialog,
   result = g_spawn_command_line_async ("exo-open --launch WebBrowser " PLUGIN_WEBSITE, NULL);
 
   if (G_UNLIKELY (result == FALSE))
-    g_warning (_("Unable to open the following url: %s"), PLUGIN_WEBSITE);
+    g_warning ("Unable to open the following url: %s", PLUGIN_WEBSITE);
 
   //#endif
 }
