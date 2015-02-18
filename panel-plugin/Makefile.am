@@ -76,6 +76,7 @@ desktop_DATA = $(desktop_in_files:.desktop.in.in=.desktop)
 @INTLTOOL_DESKTOP_RULE@
 
 EXTRA_DIST = \
+	pulseaudio-dialog.glade \
 	$(desktop_in_files)
 
 DISTCLEANFILES = \

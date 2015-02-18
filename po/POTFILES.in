@@ -1,3 +1,7 @@
 panel-plugin/pulseaudio.desktop.in.in
-panel-plugin/pulseaudio-button.c
 panel-plugin/pulseaudio-dialog.glade
+panel-plugin/pulseaudio-plugin.c
+panel-plugin/pulseaudio-config.c
+panel-plugin/pulseaudio-dialog.c
+panel-plugin/pulseaudio-button.c
+panel-plugin/pulseaudio-volume.c
