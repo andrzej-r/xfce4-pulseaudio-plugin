@@ -47,6 +47,7 @@
 
 #define DEFAULT_ENABLE_KEYBOARD_SHORTCUTS         TRUE
 #define DEFAULT_VOLUME_STEP                       6
+#define DEFAULT_MIXER_NAME                        "pavucontrol"
 
 
 
@@ -74,6 +75,7 @@ struct _PulseaudioConfig
 
   gboolean         enable_keyboard_shortcuts;
   guint            volume_step;
+  gchar           *mixer_name;
 };
 
 
@@ -83,6 +85,7 @@ enum
     PROP_0,
     PROP_ENABLE_KEYBOARD_SHORTCUTS,
     PROP_VOLUME_STEP,
+    PROP_MIXER_NAME,
     N_PROPERTIES,
   };
 
@@ -127,6 +130,15 @@ pulseaudio_config_class_init (PulseaudioConfigClass *klass)
 
 
 
+  g_object_class_install_property (gobject_class,
+                                   PROP_MIXER_NAME,
+                                   g_param_spec_string ("mixer-name",
+                                                        NULL, NULL,
+                                                        DEFAULT_MIXER_NAME,
+                                                        G_PARAM_READWRITE |
+                                                        G_PARAM_STATIC_STRINGS));
+
+
   pulseaudio_config_signals[CONFIGURATION_CHANGED] =
     g_signal_new (g_intern_static_string ("configuration-changed"),
                   G_TYPE_FROM_CLASS (gobject_class),
@@ -143,6 +155,7 @@ pulseaudio_config_init (PulseaudioConfig *config)
 {
   config->enable_keyboard_shortcuts = DEFAULT_ENABLE_KEYBOARD_SHORTCUTS;
   config->volume_step               = DEFAULT_VOLUME_STEP;
+  config->mixer_name                = g_strdup (DEFAULT_MIXER_NAME);
 }
 
 
@@ -150,9 +163,10 @@ pulseaudio_config_init (PulseaudioConfig *config)
 static void
 pulseaudio_config_finalize (GObject *object)
 {
-  //PulseaudioConfig *config = PULSEAUDIO_CONFIG (object);
+  PulseaudioConfig *config = PULSEAUDIO_CONFIG (object);
 
   xfconf_shutdown();
+  g_free (config->mixer_name);
 
   G_OBJECT_CLASS (pulseaudio_config_parent_class)->finalize (object);
 }
@@ -175,6 +189,10 @@ pulseaudio_config_get_property (GObject    *object,
 
     case PROP_VOLUME_STEP:
       g_value_set_uint (value, config->volume_step);
+      break;
+
+    case PROP_MIXER_NAME:
+      g_value_set_string (value, config->mixer_name);
       break;
 
     default:
@@ -217,6 +235,11 @@ pulseaudio_config_set_property (GObject      *object,
         }
       break;
 
+    case PROP_MIXER_NAME:
+      g_free (config->mixer_name);
+      config->mixer_name = g_value_dup_string (value);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -248,6 +271,17 @@ pulseaudio_config_get_volume_step (PulseaudioConfig *config)
 
 
 
+const gchar *
+pulseaudio_config_get_mixer_name (PulseaudioConfig *config)
+{
+  g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), DEFAULT_MIXER_NAME);
+
+  return config->mixer_name;
+}
+
+
+
+
 PulseaudioConfig *
 pulseaudio_config_new (const gchar     *property_base)
 {
@@ -267,6 +301,10 @@ pulseaudio_config_new (const gchar     *property_base)
 
       property = g_strconcat (property_base, "/volume-step", NULL);
       xfconf_g_property_bind (channel, property, G_TYPE_UINT, config, "volume-step");
+      g_free (property);
+
+      property = g_strconcat (property_base, "/mixer-name", NULL);
+      xfconf_g_property_bind (channel, property, G_TYPE_STRING, config, "mixer-name");
       g_free (property);
 
       g_object_notify (G_OBJECT (config), "enable-keyboard-shortcuts");

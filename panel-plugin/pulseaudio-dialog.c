@@ -53,6 +53,9 @@
 static void              pulseaudio_dialog_build                  (PulseaudioDialog          *dialog);
 static void              pulseaudio_dialog_help_button_clicked    (PulseaudioDialog          *dialog,
                                                                    GtkWidget                 *button);
+static void              pulseaudio_dialog_mixer_name_changed     (PulseaudioDialog          *dialog);
+static void              pulseaudio_dialog_run_mixer              (PulseaudioDialog          *dialog,
+                                                                   GtkWidget                 *widget);
 
 
 
@@ -91,6 +94,43 @@ pulseaudio_dialog_init (PulseaudioDialog *dialog)
 
 
 
+static void
+pulseaudio_dialog_mixer_name_changed (PulseaudioDialog *dialog)
+{
+  GObject *object;
+  gchar   *path;
+
+  g_return_if_fail (GTK_IS_BUILDER (dialog));
+  g_return_if_fail (IS_PULSEAUDIO_CONFIG (dialog->config));
+
+  object = gtk_builder_get_object (GTK_BUILDER (dialog), "button-run-mixer");
+  g_return_if_fail (GTK_IS_BUTTON (object));
+  path = g_find_program_in_path (pulseaudio_config_get_mixer_name (dialog->config));
+  gtk_widget_set_sensitive (GTK_WIDGET (object), path != NULL);
+  g_free (path);
+}
+
+
+
+static void
+pulseaudio_dialog_run_mixer (PulseaudioDialog *dialog,
+                             GtkWidget        *widget)
+{
+  GError *error = NULL;
+
+  g_return_if_fail (IS_PULSEAUDIO_DIALOG (dialog));
+  g_return_if_fail (GTK_IS_BUTTON (widget));
+
+  if (!xfce_spawn_command_line_on_screen (gtk_widget_get_screen (widget),
+                                          pulseaudio_config_get_mixer_name (dialog->config),
+                                          FALSE, FALSE, &error))
+    {
+      xfce_dialog_show_error (NULL, error, ("Failed to execute command \"%s\"."),
+                              pulseaudio_config_get_mixer_name (dialog->config));
+      g_error_free (error);
+    }
+}
+
 
 static void
 pulseaudio_dialog_build (PulseaudioDialog *dialog)
@@ -123,10 +163,25 @@ pulseaudio_dialog_build (PulseaudioDialog *dialog)
                                 dialog);
 
       object = gtk_builder_get_object (builder, "checkbutton-keyboard-shortcuts");
-      g_return_if_fail (GTK_IS_WIDGET (object));
+      g_return_if_fail (GTK_IS_CHECK_BUTTON (object));
       g_object_bind_property (G_OBJECT (dialog->config), "enable-keyboard-shortcuts",
                               G_OBJECT (object), "active",
                               G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
+
+      object = gtk_builder_get_object (builder, "entry-mixer-name");
+      g_return_if_fail (GTK_IS_ENTRY (object));
+      g_object_bind_property (G_OBJECT (dialog->config), "mixer-name",
+                              G_OBJECT (object), "text",
+                              G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
+
+      object = gtk_builder_get_object (builder, "button-run-mixer");
+      g_return_if_fail (GTK_IS_BUTTON (object));
+      g_signal_connect_swapped (G_OBJECT (dialog->config), "notify::mixer-name",
+                                G_CALLBACK (pulseaudio_dialog_mixer_name_changed),
+                                dialog);
+      pulseaudio_dialog_mixer_name_changed (dialog);
+      g_signal_connect_swapped (G_OBJECT (object), "clicked",
+                                G_CALLBACK (pulseaudio_dialog_run_mixer), dialog);
 
     }
   else

@@ -220,8 +220,22 @@ pulseaudio_button_button_release (GtkWidget      *widget,
                                   GdkEventButton *event)
 {
   PulseaudioButton *button = PULSEAUDIO_BUTTON (widget);
+  GError *error = NULL;
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
+
+  if(event->button == 1) /* left button */
+    {
+      if (!xfce_spawn_command_line_on_screen (gtk_widget_get_screen (widget),
+                                              pulseaudio_config_get_mixer_name (button->config),
+                                              FALSE, FALSE, &error))
+        {
+          xfce_dialog_show_error (NULL, error, ("Failed to execute command \"%s\"."),
+                                  pulseaudio_config_get_mixer_name (button->config));
+          g_error_free (error);
+        }
+      return TRUE;
+    }
 
   if (event->button == 2) /* middle button */
     {

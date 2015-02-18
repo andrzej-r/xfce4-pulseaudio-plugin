@@ -163,6 +163,7 @@
                               <object class="GtkEntry" id="entry-mixer-name">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Name of the audio mixer application to start when the plugin button is pressed. E.g. "pavucontrol", "unity-control-center sound".</property>
                                 <property name="invisible_char">•</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_activatable">False</property>
