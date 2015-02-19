@@ -1,0 +1,21 @@
+# created with git log --pretty=format:"%ad %h %s %aN <%aE>" --no-merges --date=short
+2015-02-18 3124c91 make distcheck fixes Andrzej <ndrwrdck@gmail.com>
+2015-02-18 58685d5 i18n fixes Andrzej <ndrwrdck@gmail.com>
+2015-02-18 d68d6b8 Run mixer application when plugin button is clicked. Andrzej <ndrwrdck@gmail.com>
+2015-02-17 4f24d87 Experiments with gettext Andrzej <ndrwrdck@gmail.com>
+2015-02-17 f369894 Fix .glade file Andrzej <ndrwrdck@gmail.com>
+2015-02-17 820460c Activate the button on click Andrzej <ndrwrdck@gmail.com>
+2015-02-17 36816c1 Copyright update Andrzej <ndrwrdck@gmail.com>
+2015-02-17 50c66c9 Added a tooltip Andrzej <ndrwrdck@gmail.com>
+2015-02-16 c1cee69 Added a hidden option "volume-step" Andrzej <ndrwrdck@gmail.com>
+2015-02-14 9aa2bb6 Added preference dialog box implementation. Andrzej <ndrwrdck@gmail.com>
+2015-02-14 fef99e2 Added initial support for config dialog and fixed keybinding option Andrzej <ndrwrdck@gmail.com>
+2014-08-12 2f7ce55 log pulseaudio sink name Andrzej <ndrwrdck@gmail.com>
+2014-06-26 78e8d29 Added support for keyboard shortcuts Andrzej <ndrwrdck@gmail.com>
+2014-04-30 3ce3d47 Cleanup Andrzej <ndrwrdck@gmail.com>
+2014-04-30 a4c2b79 Check volume at start up Andrzej <ndrwrdck@gmail.com>
+2014-04-30 8b00bc1 Protection against out-of-range volume settings Andrzej <ndrwrdck@gmail.com>
+2014-04-30 ba7ea62 Use a common callback for volume and mute change notifications Andrzej <ndrwrdck@gmail.com>
+2014-04-26 5a6bb47 Added support for muting output devices Andrzej <ndrwrdck@gmail.com>
+2014-04-25 674ebf1 Use the same icon names and sizes as in xfce4-mixer Andrzej <ndrwrdck@gmail.com>
+2014-04-24 6d5680f Initial version Andrzej <ndrwrdck@gmail.com>
