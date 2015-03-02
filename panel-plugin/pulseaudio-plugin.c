@@ -32,6 +32,7 @@
 
 #include <gtk/gtk.h>
 #include <libxfce4util/libxfce4util.h>
+#include <libxfce4ui/libxfce4ui.h>
 #include <libxfce4panel/xfce-panel-plugin.h>
 
 #include "pulseaudio-plugin.h"
@@ -320,9 +321,35 @@ pulseaudio_plugin_mute_pressed (const char            *keystring,
 
 
 static void
+pulseaudio_plugin_mixer_item_activate_cb (PulseaudioPlugin *pulseaudio_plugin,
+                                          GtkMenuItem      *menu_item)
+{
+  const gchar *command;
+  GError      *error = NULL;
+
+  g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
+
+  command = pulseaudio_config_get_mixer_name (pulseaudio_plugin->config);
+  if (!xfce_spawn_command_line_on_screen (gtk_widget_get_screen (GTK_WIDGET (menu_item)),
+                                          command, FALSE, FALSE, &error))
+    {
+      xfce_dialog_show_error (NULL, error,
+                              _("Could not execute the command \"%s\". "
+                                "Ensure that either the location of the command "
+                                "is included in the PATH environment variable or "
+                                "that you are providing the full path to the "
+                                "command."), command);
+      g_error_free (error);
+    }
+}
+
+
+static void
 pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
 {
   PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (plugin);
+  GtkWidget        *mixer_menu_item;
+  GtkWidget        *separator;
 
 #ifdef HAVE_IDO
   ido_init();
@@ -358,6 +385,17 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
 
   /* volume controller */
   pulseaudio_plugin->volume = pulseaudio_volume_new ();
+
+  /* menu items */
+  separator = gtk_separator_menu_item_new ();
+  xfce_panel_plugin_menu_insert_item (plugin, GTK_MENU_ITEM (separator));
+  gtk_widget_show (separator);
+
+  mixer_menu_item = gtk_menu_item_new_with_mnemonic (_("Run Audio Mi_xer"));
+  xfce_panel_plugin_menu_insert_item (plugin, GTK_MENU_ITEM (mixer_menu_item));
+  g_signal_connect_swapped (G_OBJECT (mixer_menu_item), "activate",
+    G_CALLBACK (pulseaudio_plugin_mixer_item_activate_cb), pulseaudio_plugin);
+  gtk_widget_show (mixer_menu_item);
 
   /* instantiate a button box */
   pulseaudio_plugin->button = pulseaudio_button_new (pulseaudio_plugin->config,

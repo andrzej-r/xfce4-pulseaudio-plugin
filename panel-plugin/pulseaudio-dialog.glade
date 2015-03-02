@@ -151,7 +151,7 @@
                               <object class="GtkLabel" id="label2">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Mixer _tool</property>
+                                <property name="label" translatable="yes">Audio _Mixer</property>
                                 <property name="use_underline">True</property>
                               </object>
                               <packing>
@@ -163,7 +163,7 @@
                               <object class="GtkEntry" id="entry-mixer-name">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">Name of the audio mixer application to start when the plugin button is pressed. E.g. "pavucontrol", "unity-control-center sound".</property>
+                                <property name="tooltip_text" translatable="yes">Audio mixer command that can be executed from the context menu, e.g. "pavucontrol", "unity-control-center sound".</property>
                                 <property name="invisible_char">•</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_activatable">False</property>
@@ -184,7 +184,7 @@
                                 <property name="xscale">0</property>
                                 <child>
                                   <object class="GtkButton" id="button-run-mixer">
-                                    <property name="label" translatable="yes">_Run mixer tool...</property>
+                                    <property name="label" translatable="yes">_Run Audio Mixer...</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
