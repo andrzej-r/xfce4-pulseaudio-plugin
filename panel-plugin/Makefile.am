@@ -60,7 +60,8 @@ libpulseaudio_plugin_la_LIBADD = \
 	$(LIBXFCE4PANEL_LIBS) \
 	$(XFCONF_LIBS) \
 	$(IDO_LIBS) \
-	$(KEYBINDER_LIBS)
+	$(KEYBINDER_LIBS) \
+	$(LIBM)
 
 #
 # Desktop file

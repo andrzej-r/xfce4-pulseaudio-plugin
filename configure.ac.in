@@ -97,6 +97,9 @@ dnl **********************************
 XDT_CHECK_OPTIONAL_PACKAGE([KEYBINDER], [keybinder-3.0], [0.2.2], [keybinder],
                            [keybinder Support])
 
+AC_CHECK_LIBM
+AC_SUBST(LIBM)
+
 dnl ***********************************
 dnl *** Check for debugging support ***
 dnl ***********************************
