@@ -1,9 +1,10 @@
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DG_LOG_DOMAIN=\"pulseaudio-plugin\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
 	-DDEFAULT_MIXER_COMMAND=\"$(DEFAULT_MIXER_COMMAND)\" \
+	-DDATADIR=\""$(datadir)"\" \
 	$(PLATFORM_CPPFLAGS)
 
 #
@@ -44,8 +45,7 @@ libpulseaudio_plugin_la_CFLAGS = \
 	$(XFCONF_CFLAGS) \
 	$(IDO_CFLAGS) \
 	$(KEYBINDER_CFLAGS) \
-	$(PLATFORM_CFLAGS) \
-	-DDATADIR=\""$(datadir)"\"
+	$(PLATFORM_CFLAGS)
 
 libpulseaudio_plugin_la_LDFLAGS = \
 	-avoid-version \
