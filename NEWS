@@ -1,0 +1,15 @@
+0.2.0
+=====
+
+- Autoconf and automake modernization
+- Make the default mixer command a compile-time option
+- Add menu item for muting the volume
+- Allow execution of the mixer from context menu
+- Replace the button with a toggle button that displays a popup with a scale
+  for adjusting the volume when activated
+
+0.1.0
+=====
+
+- Initial version
+

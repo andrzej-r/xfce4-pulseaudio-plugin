@@ -188,6 +188,7 @@ pulseaudio_plugin_show_about (XfcePanelPlugin *plugin)
   const gchar *auth[] =
     {
       "Andrzej Radecki <ndrwrdck@gmail.com>",
+      "Guido Berhoerster <guido+xfce@berhoerster.name>",
       NULL
     };
 
@@ -199,9 +200,9 @@ pulseaudio_plugin_show_about (XfcePanelPlugin *plugin)
                          "license",      xfce_get_license_text (XFCE_LICENSE_TEXT_GPL),
                          "version",      PACKAGE_VERSION,
                          "program-name", PACKAGE_NAME,
-                         "comments",     _("A panel plugin for controlling PulseAudio mixer."),
+                         "comments",     _("Adjust the audio volume of the PulseAudio sound system"),
                          "website",      "http://goodies.xfce.org/projects/panel-plugins/xfce4-pulseaudio-plugin",
-                         "copyright",    _("Copyright (c) 2014\n"),
+                         "copyright",    _("Copyright \xc2\xa9 2014 Andrzej Radecki\n"),
                          "authors",      auth,
                          NULL);
 

@@ -2,7 +2,7 @@
 Type=X-XFCE-PanelPlugin
 Encoding=UTF-8
 _Name=PulseAudio Plugin
-_Comment=A panel plugin for controlling PulseAudio mixer.
+_Comment=Adjust the audio volume of the PulseAudio sound system
 Icon=xfce4-pulseaudio-plugin
 X-XFCE-Module=pulseaudio-plugin
 X-XFCE-Internal=FALSE
