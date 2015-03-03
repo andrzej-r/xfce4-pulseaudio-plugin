@@ -176,8 +176,8 @@ static void
 update_packing (ScaleMenuItem *self)
 {
   ScaleMenuItemPrivate *priv = GET_PRIVATE (self);
-  GtkBox *hbox = GTK_BOX (gtk_hbox_new (FALSE, 0));
-  GtkBox *vbox = GTK_BOX (gtk_vbox_new (FALSE, 0));
+  GtkBox *hbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  GtkBox *vbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
   TRACE("entering");
 
@@ -396,7 +396,7 @@ scale_menu_item_new_with_range (gdouble           min,
 
   priv = GET_PRIVATE (scale_item);
 
-  priv->scale = gtk_hscale_new_with_range (min, max, step);
+  priv->scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, min, max, step);
   priv->vbox = NULL;
   priv->hbox = NULL;
 
