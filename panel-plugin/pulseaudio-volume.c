@@ -32,6 +32,7 @@
 #include <pulse/pulseaudio.h>
 #include <pulse/glib-mainloop.h>
 
+#include "pulseaudio-debug.h"
 #include "pulseaudio-volume.h"
 
 
@@ -143,14 +144,14 @@ pulseaudio_volume_sink_info_cb (pa_context         *context,
 
   if (volume->muted != muted)
     {
-      g_debug ("Updated Mute: %d -> %d", volume->muted, muted);
+      pulseaudio_debug ("Updated Mute: %d -> %d", volume->muted, muted);
       volume->muted = muted;
       g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
     }
 
   if (ABS (volume->volume - vol) > 2e-3)
     {
-      g_debug ("Updated Volume: %04.3f -> %04.3f", volume->volume, vol);
+      pulseaudio_debug ("Updated Volume: %04.3f -> %04.3f", volume->volume, vol);
       volume->volume = vol;
       g_signal_emit (G_OBJECT (volume), pulseaudio_volume_signals [VOLUME_CHANGED], 0);
     }
@@ -166,7 +167,7 @@ pulseaudio_volume_server_info_cb (pa_context           *context,
   PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
   if (i == NULL) return;
 
-  g_debug ("default sink name = %s\n", i->default_sink_name);
+  pulseaudio_debug ("default sink name = %s\n", i->default_sink_name);
   pa_context_get_sink_info_by_name (context, i->default_sink_name, pulseaudio_volume_sink_info_cb, volume);
 }
 
@@ -197,19 +198,19 @@ pulseaudio_volume_subscribe_cb (pa_context                   *context,
     {
     case PA_SUBSCRIPTION_EVENT_SINK          :
       pulseaudio_volume_sink_check (volume, context);
-      g_debug ("PulseAudio sink event");
+      pulseaudio_debug ("PulseAudio sink event");
       break;
 
     case PA_SUBSCRIPTION_EVENT_SOURCE        :
-      g_debug ("PulseAudio source event");
+      pulseaudio_debug ("PulseAudio source event");
       break;
 
     case PA_SUBSCRIPTION_EVENT_SOURCE_OUTPUT :
-      g_debug ("PulseAudio source output event");
+      pulseaudio_debug ("PulseAudio source output event");
       break;
 
     default                                  :
-      g_debug ("Unknown PulseAudio event");
+      pulseaudio_debug ("Unknown PulseAudio event");
       break;
     }
 }
@@ -229,7 +230,7 @@ pulseaudio_volume_context_state_cb (pa_context *context,
       pa_context_subscribe (context, PA_SUBSCRIPTION_MASK_SINK | PA_SUBSCRIPTION_MASK_SOURCE | PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT, NULL, NULL);
       pa_context_set_subscribe_callback (context, pulseaudio_volume_subscribe_cb, volume);
 
-      g_debug ("PulseAudio connection established");
+      pulseaudio_debug ("PulseAudio connection established");
       volume->connected = TRUE;
       pulseaudio_volume_sink_check (volume, context);
       break;
@@ -240,19 +241,19 @@ pulseaudio_volume_context_state_cb (pa_context *context,
       break;
 
     case PA_CONTEXT_CONNECTING   :
-      g_debug ("Connecting to PulseAudio server");
+      pulseaudio_debug ("Connecting to PulseAudio server");
       break;
 
     case PA_CONTEXT_SETTING_NAME :
-      g_debug ("Setting application name");
+      pulseaudio_debug ("Setting application name");
       break;
 
     case PA_CONTEXT_AUTHORIZING  :
-      g_debug ("Authorizing");
+      pulseaudio_debug ("Authorizing");
       break;
 
     case PA_CONTEXT_UNCONNECTED  :
-      g_debug ("Not connected to PulseAudio server");
+      pulseaudio_debug ("Not connected to PulseAudio server");
       break;
 
     default                      :
@@ -410,7 +411,7 @@ pulseaudio_volume_set_volume_cb2 (pa_context         *context,
   PulseaudioVolume *volume = PULSEAUDIO_VOLUME (userdata);
   if (i == NULL) return;
 
-  //g_debug ("*** %s", pa_cvolume_snprint (st, sizeof (st), &i->volume));
+  //pulseaudio_debug ("*** %s", pa_cvolume_snprint (st, sizeof (st), &i->volume));
   pa_cvolume_set (&i->volume, 1, pulseaudio_volume_d2v (volume->volume));
   pa_context_set_sink_volume_by_index (context, i->index, &i->volume, pulseaudio_volume_sink_volume_changed, volume);
 }

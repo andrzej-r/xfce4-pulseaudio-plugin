@@ -35,6 +35,7 @@
 #include <libxfce4ui/libxfce4ui.h>
 #include <libxfce4panel/xfce-panel-plugin.h>
 
+#include "pulseaudio-debug.h"
 #include "pulseaudio-plugin.h"
 #include "pulseaudio-config.h"
 #include "pulseaudio-volume.h"
@@ -57,6 +58,7 @@
 
 
 /* prototypes */
+static void             pulseaudio_plugin_init_debug                       (void);
 static void             pulseaudio_plugin_construct                        (XfcePanelPlugin       *plugin);
 static void             pulseaudio_plugin_free_data                        (XfcePanelPlugin       *plugin);
 static void             pulseaudio_plugin_show_about                       (XfcePanelPlugin       *plugin);
@@ -93,9 +95,6 @@ struct _PulseaudioPlugin
 
   /* config dialog builder */
   PulseaudioDialog    *dialog;
-
-  /* log file */
-  FILE                *logfile;
 };
 
 
@@ -125,9 +124,12 @@ pulseaudio_plugin_init (PulseaudioPlugin *pulseaudio_plugin)
 {
   g_log_set_always_fatal (G_LOG_LEVEL_ERROR);
 
-  pulseaudio_plugin->volume          = NULL;
-  pulseaudio_plugin->button          = NULL;
-  pulseaudio_plugin->logfile         = NULL;
+  /* initialize debug logging */
+  pulseaudio_plugin_init_debug ();
+  pulseaudio_debug("Pulseaudio Panel Plugin initialized");
+
+  pulseaudio_plugin->volume            = NULL;
+  pulseaudio_plugin->button            = NULL;
 }
 
 
@@ -141,6 +143,39 @@ pulseaudio_plugin_free_data (XfcePanelPlugin *plugin)
   /* release keybindings */
   pulseaudio_plugin_unbind_keys (pulseaudio_plugin);
 #endif
+}
+
+
+
+static void
+pulseaudio_plugin_init_debug (void)
+{
+  const gchar  *debug_env;
+  gchar       **debug_domains;
+  gsize         i;
+  gchar        *message_debug_env;
+
+  /* enable debug output if the PANEL_DEBUG is set to "all" */
+  debug_env = g_getenv ("PANEL_DEBUG");
+  if ((debug_env != NULL) && (debug_env != '\0'))
+    {
+      debug_domains = g_strsplit (debug_env, ",", -1);
+      for (i = 0; debug_domains[i] != NULL; i++)
+        {
+          g_strstrip (debug_domains[i]);
+
+          if (g_str_equal (debug_domains[i], G_LOG_DOMAIN))
+            break;
+          else if (g_str_equal (debug_domains[i], "all"))
+            {
+              message_debug_env = g_strjoin (" ", G_LOG_DOMAIN, g_getenv ("G_MESSAGES_DEBUG"), NULL);
+              g_setenv ("G_MESSAGES_DEBUG", message_debug_env, TRUE);
+              g_free (message_debug_env);
+              break;
+            }
+        }
+      g_strfreev (debug_domains);
+    }
 }
 
 
@@ -187,48 +222,6 @@ pulseaudio_plugin_configure_plugin (XfcePanelPlugin *plugin)
 
 
 
-static void
-pulseaudio_plugin_log_handler (const gchar    *domain,
-                               GLogLevelFlags  level,
-                               const gchar    *message,
-                               gpointer        data)
-{
-  PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (data);
-  gchar            *path;
-  const gchar      *prefix;
-
-  if (pulseaudio_plugin->logfile == NULL)
-    {
-      g_mkdir_with_parents (g_get_user_cache_dir (), 0755);
-      path = g_build_filename (g_get_user_cache_dir (), "xfce4-pulseaudio-plugin.log", NULL);
-      pulseaudio_plugin->logfile = fopen (path, "w");
-      g_free (path);
-    }
-
-  if (pulseaudio_plugin->logfile)
-    {
-      switch (level & G_LOG_LEVEL_MASK)
-        {
-        case G_LOG_LEVEL_ERROR:    prefix = "ERROR";    break;
-        case G_LOG_LEVEL_CRITICAL: prefix = "CRITICAL"; break;
-        case G_LOG_LEVEL_WARNING:  prefix = "WARNING";  break;
-        case G_LOG_LEVEL_MESSAGE:  prefix = "MESSAGE";  break;
-        case G_LOG_LEVEL_INFO:     prefix = "INFO";     break;
-        case G_LOG_LEVEL_DEBUG:    prefix = "DEBUG";    break;
-        default:                   prefix = "LOG";      break;
-        }
-
-      fprintf (pulseaudio_plugin->logfile, "%-10s %-25s %s\n", prefix, domain, message);
-      fflush (pulseaudio_plugin->logfile);
-    }
-
-  /* print log to the stdout */
-  if (level & G_LOG_LEVEL_ERROR || level & G_LOG_LEVEL_CRITICAL)
-    g_log_default_handler (domain, level, message, NULL);
-}
-
-
-
 static gboolean
 pulseaudio_plugin_size_changed (XfcePanelPlugin *plugin,
                                 gint             size)
@@ -264,7 +257,7 @@ pulseaudio_plugin_bind_keys (PulseaudioPlugin      *pulseaudio_plugin)
 {
   gboolean success;
   g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
-  g_debug ("Grabbing volume control keys");
+  pulseaudio_debug ("Grabbing volume control keys");
 
   success = (keybinder_bind (PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed, pulseaudio_plugin) &&
              keybinder_bind (PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed, pulseaudio_plugin) &&
@@ -281,7 +274,7 @@ static void
 pulseaudio_plugin_unbind_keys (PulseaudioPlugin      *pulseaudio_plugin)
 {
   g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
-  g_debug ("Releasing volume control keys");
+  pulseaudio_debug ("Releasing volume control keys");
 
   keybinder_unbind (PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed);
   keybinder_unbind (PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY, pulseaudio_plugin_volume_key_pressed);
@@ -298,7 +291,7 @@ pulseaudio_plugin_volume_key_pressed (const char            *keystring,
   gdouble           volume_step       = pulseaudio_config_get_volume_step (pulseaudio_plugin->config) / 100.0;
   gdouble           new_volume;
 
-  g_debug ("%s pressed", keystring);
+  pulseaudio_debug ("%s pressed", keystring);
 
   if (strcmp (keystring, PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY) == 0)
     pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume + volume_step, 0.0), 1.0));
@@ -313,7 +306,7 @@ pulseaudio_plugin_mute_pressed (const char            *keystring,
 {
   PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (user_data);
 
-  g_debug ("%s pressed", keystring);
+  pulseaudio_debug ("%s pressed", keystring);
 
   pulseaudio_volume_toggle_muted (pulseaudio_plugin->volume);
 }
@@ -362,9 +355,6 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
 
   /* setup transation domain */
   xfce_textdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR, "UTF-8");
-
-  /* log messages to a file */
-  g_log_set_default_handler (pulseaudio_plugin_log_handler, plugin);
 
   /* initialize xfconf */
   pulseaudio_plugin->config = pulseaudio_config_new (xfce_panel_plugin_get_property_base (plugin));

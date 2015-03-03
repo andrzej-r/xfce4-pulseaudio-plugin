@@ -1,7 +1,7 @@
 
 INCLUDES = \
 	-I$(top_srcdir) \
-	-DG_LOG_DOMAIN=\"libpulseaudio-plugin\" \
+	-DG_LOG_DOMAIN=\"pulseaudio-plugin\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
 	$(PLATFORM_CPPFLAGS)
 
@@ -19,6 +19,8 @@ libpulseaudio_built_sources = \
 
 libpulseaudio_plugin_la_SOURCES = \
 	$(libpulseaudio_built_sources) \
+	pulseaudio-debug.c \
+	pulseaudio-debug.h \
 	pulseaudio-volume.c \
 	pulseaudio-volume.h \
 	pulseaudio-button.c \
