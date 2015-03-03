@@ -153,7 +153,7 @@ pulseaudio_config_init (PulseaudioConfig *config)
 {
   config->enable_keyboard_shortcuts = DEFAULT_ENABLE_KEYBOARD_SHORTCUTS;
   config->volume_step               = DEFAULT_VOLUME_STEP;
-  config->mixer_command                = g_strdup (DEFAULT_MIXER_COMMAND);
+  config->mixer_command             = g_strdup (DEFAULT_MIXER_COMMAND);
 }
 
 

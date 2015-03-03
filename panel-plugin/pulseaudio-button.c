@@ -228,11 +228,11 @@ pulseaudio_button_button_release (GtkWidget      *widget,
   if(event->button == 1) /* left button */
     {
       if (!xfce_spawn_command_line_on_screen (gtk_widget_get_screen (widget),
-                                              pulseaudio_config_get_mixer_name (button->config),
+                                              pulseaudio_config_get_mixer_command (button->config),
                                               FALSE, FALSE, &error))
         {
           xfce_dialog_show_error (NULL, error, _("Failed to execute command \"%s\"."),
-                                  pulseaudio_config_get_mixer_name (button->config));
+                                  pulseaudio_config_get_mixer_command (button->config));
           g_error_free (error);
         }
       return TRUE;
