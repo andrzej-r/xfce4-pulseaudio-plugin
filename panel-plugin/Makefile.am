@@ -3,6 +3,7 @@ INCLUDES = \
 	-I$(top_srcdir) \
 	-DG_LOG_DOMAIN=\"pulseaudio-plugin\" \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\" \
+	-DDEFAULT_MIXER_COMMAND=\"$(DEFAULT_MIXER_COMMAND)\" \
 	$(PLATFORM_CPPFLAGS)
 
 #

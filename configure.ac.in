@@ -105,6 +105,15 @@ dnl *** Check for debugging support ***
 dnl ***********************************
 XDT_FEATURE_DEBUG()
 
+dnl *****************************
+dnl *** Default mixer command ***
+dnl *****************************
+AC_ARG_WITH([mixer-command],
+            [AS_HELP_STRING([--with-mixer-command=CMD], [Default mixer command (default: pavucontrol]))],
+            [DEFAULT_MIXER_COMMAND="$withval"],
+            [DEFAULT_MIXER_COMMAND="pavucontrol"])
+AC_SUBST([DEFAULT_MIXER_COMMAND])
+
 dnl *********************************
 dnl *** Substitute platform flags ***
 dnl *********************************
@@ -134,7 +143,8 @@ dnl ***************************
 echo
 echo "Build Configuration:"
 echo
-echo "* Debug Support:        $enable_debug"
-echo "* Use keybinder:        ${KEYBINDER_FOUND:-no}"
-echo "* Use IDO library:      ${IDO_FOUND:-no}"
+echo "* Debug Support:          $enable_debug"
+echo "* Use keybinder:          ${KEYBINDER_FOUND:-no}"
+echo "* Use IDO library:        ${IDO_FOUND:-no}"
+echo "* Default Mixer command:  $DEFAULT_MIXER_COMMAND"
 echo

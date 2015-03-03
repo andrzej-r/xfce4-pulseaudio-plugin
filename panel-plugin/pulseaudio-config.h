@@ -40,7 +40,7 @@ PulseaudioConfig  *pulseaudio_config_new                            (const gchar
 
 gboolean           pulseaudio_config_get_enable_keyboard_shortcuts  (PulseaudioConfig     *config);
 guint              pulseaudio_config_get_volume_step                (PulseaudioConfig     *config);
-const gchar       *pulseaudio_config_get_mixer_name                 (PulseaudioConfig     *config);
+const gchar       *pulseaudio_config_get_mixer_command                 (PulseaudioConfig     *config);
 
 G_END_DECLS
 

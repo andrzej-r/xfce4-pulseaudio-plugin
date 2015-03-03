@@ -322,7 +322,7 @@ pulseaudio_plugin_mixer_item_activate_cb (PulseaudioPlugin *pulseaudio_plugin,
 
   g_return_if_fail (IS_PULSEAUDIO_PLUGIN (pulseaudio_plugin));
 
-  command = pulseaudio_config_get_mixer_name (pulseaudio_plugin->config);
+  command = pulseaudio_config_get_mixer_command (pulseaudio_plugin->config);
   if (!xfce_spawn_command_line_on_screen (gtk_widget_get_screen (GTK_WIDGET (menu_item)),
                                           command, FALSE, FALSE, &error))
     {

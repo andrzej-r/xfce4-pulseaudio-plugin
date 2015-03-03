@@ -160,7 +160,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry-mixer-name">
+                              <object class="GtkEntry" id="entry-mixer-command">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="tooltip_text" translatable="yes">Audio mixer command that can be executed from the context menu, e.g. "pavucontrol", "unity-control-center sound".</property>
