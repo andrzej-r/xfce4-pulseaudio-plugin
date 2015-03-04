@@ -52,10 +52,10 @@
 
 /* Icons for different volume levels */
 static const char *icons[] = {
-  "audio-volume-muted",
-  "audio-volume-low",
-  "audio-volume-medium",
-  "audio-volume-high",
+  "audio-volume-muted-symbolic",
+  "audio-volume-low-symbolic",
+  "audio-volume-medium-symbolic",
+  "audio-volume-high-symbolic",
   NULL
 };
 
@@ -138,7 +138,7 @@ pulseaudio_button_init (PulseaudioButton *button)
   /* Preload icons */
   button->pixbuf_idx = 0;
   button->pixbufs = g_new0 (GdkPixbuf*, G_N_ELEMENTS (icons)-1);
-  pulseaudio_button_update_icons (button);
+  g_signal_connect (G_OBJECT (button), "style_updated", G_CALLBACK (pulseaudio_button_update_icons), button); 
 
   /* Setup Gtk style */
   css_provider = gtk_css_provider_new ();
@@ -266,24 +266,22 @@ pulseaudio_button_menu_deactivate (PulseaudioButton *button,
 static void
 pulseaudio_button_update_icons (PulseaudioButton *button)
 {
-  GtkIconTheme   *icon_theme;
   guint           i;
+  GtkIconInfo    *info;
+  GtkStyleContext *context;
+  gboolean is_symbolic;
 
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
 
-  icon_theme = gtk_icon_theme_get_for_screen (gtk_widget_get_screen (GTK_WIDGET (button)));
+  context = GTK_STYLE_CONTEXT (gtk_widget_get_style_context (GTK_WIDGET (gtk_widget_get_parent (GTK_WIDGET (button)))));
 
   /* Pre-load all icons */
   for (i = 0; i < G_N_ELEMENTS (icons)-1; ++i)
     {
       if (GDK_IS_PIXBUF (button->pixbufs[i]))
         g_object_unref (G_OBJECT (button->pixbufs[i]));
-
-      button->pixbufs[i] = gtk_icon_theme_load_icon (icon_theme,
-                                                     icons[i],
-                                                     button->icon_size,
-                                                     GTK_ICON_LOOKUP_USE_BUILTIN,
-                                                     NULL);
+        info = gtk_icon_theme_lookup_icon (gtk_icon_theme_get_default (), icons[i], button->icon_size, GTK_ICON_LOOKUP_USE_BUILTIN);
+        button->pixbufs[i] = gtk_icon_info_load_symbolic_for_context (info, context, NULL, NULL);
     }
 
   /* Update the state of the button */
