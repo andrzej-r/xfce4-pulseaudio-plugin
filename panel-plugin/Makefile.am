@@ -33,6 +33,8 @@ libpulseaudio_plugin_la_SOURCES = \
 	pulseaudio-plugin.h \
 	pulseaudio-dialog.c \
 	pulseaudio-dialog.h \
+	pulseaudio-menu.c \
+	pulseaudio-menu.h \
 	scalemenuitem.c \
 	scalemenuitem.h
 

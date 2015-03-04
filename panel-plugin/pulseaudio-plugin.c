@@ -389,7 +389,8 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
   gtk_widget_show (mixer_menu_item);
 
   /* instantiate a button box */
-  pulseaudio_plugin->button = pulseaudio_button_new (pulseaudio_plugin->config,
+  pulseaudio_plugin->button = pulseaudio_button_new (pulseaudio_plugin,
+                                                     pulseaudio_plugin->config,
                                                      pulseaudio_plugin->volume);
   gtk_container_add (GTK_CONTAINER (plugin), GTK_WIDGET (pulseaudio_plugin->button));
   gtk_widget_show (GTK_WIDGET (pulseaudio_plugin->button));

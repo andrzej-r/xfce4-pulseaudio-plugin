@@ -41,6 +41,7 @@
 
 #include "pulseaudio-plugin.h"
 #include "pulseaudio-config.h"
+#include "pulseaudio-menu.h"
 #include "pulseaudio-button.h"
 
 #define V_MUTED  0
@@ -63,12 +64,10 @@ static const char *icons[] = {
 static void                 pulseaudio_button_finalize        (GObject            *object);
 static gboolean             pulseaudio_button_button_press    (GtkWidget          *widget,
                                                                GdkEventButton     *event);
-static gboolean             pulseaudio_button_button_release  (GtkWidget          *widget,
-                                                               GdkEventButton     *event);
 static gboolean             pulseaudio_button_scroll_event    (GtkWidget          *widget,
                                                                GdkEventScroll     *event);
 static void                 pulseaudio_button_menu_deactivate (PulseaudioButton   *button,
-                                                               GtkMenu            *menu);
+                                                               GtkMenuShell       *menu);
 static void                 pulseaudio_button_update_icons    (PulseaudioButton   *button);
 static void                 pulseaudio_button_update          (PulseaudioButton   *button,
                                                                gboolean            force_update);
@@ -78,6 +77,7 @@ struct _PulseaudioButton
 {
   GtkToggleButton       __parent__;
 
+  PulseaudioPlugin     *plugin;
   PulseaudioConfig     *config;
   PulseaudioVolume     *volume;
 
@@ -91,7 +91,7 @@ struct _PulseaudioButton
   guint                 pixbuf_idx;
   GdkPixbuf           **pixbufs;
 
-  GtkMenu              *menu;
+  GtkWidget            *menu;
 
   gulong                volume_changed_id;
   gulong                deactivate_id;
@@ -118,7 +118,6 @@ pulseaudio_button_class_init (PulseaudioButtonClass *klass)
 
   gtkwidget_class = GTK_WIDGET_CLASS (klass);
   gtkwidget_class->button_press_event   = pulseaudio_button_button_press;
-  gtkwidget_class->button_release_event = pulseaudio_button_button_release;
   gtkwidget_class->scroll_event         = pulseaudio_button_scroll_event;
 }
 
@@ -149,6 +148,7 @@ pulseaudio_button_init (PulseaudioButton *button)
   /* Intercept scroll events */
   gtk_widget_add_events (GTK_WIDGET (button), GDK_SCROLL_MASK);
 
+  button->plugin = NULL;
   button->config = NULL;
   button->volume = NULL;
 
@@ -185,8 +185,8 @@ pulseaudio_button_finalize (GObject *object)
 
   if (button->menu != NULL)
     {
-      gtk_menu_detach (button->menu);
-      gtk_menu_popdown (button->menu);
+      gtk_menu_detach (GTK_MENU (button->menu));
+      gtk_menu_popdown (GTK_MENU (button->menu));
       button->menu = NULL;
     }
 
@@ -203,42 +203,23 @@ pulseaudio_button_button_press (GtkWidget      *widget,
   if(event->button == 1) /* left button */
     {
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
+      if (button->menu == NULL)
+          button->menu = pulseaudio_menu_new (button->volume, button->config, widget);
+      if (button->deactivate_id == 0)
+          button->deactivate_id = g_signal_connect_swapped
+            (GTK_MENU_SHELL (button->menu), "deactivate",
+             G_CALLBACK (pulseaudio_button_menu_deactivate), button);
+
+      gtk_menu_popup (GTK_MENU (button->menu),
+                      NULL, NULL,
+                      xfce_panel_plugin_position_menu, button->plugin,
+                      //NULL, NULL,
+                      0,
+                      gtk_get_current_event_time ());
       return TRUE;
     }
 
   if(event->button == 2) /* middle button */
-    {
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
-      return TRUE;
-    }
-
-  return FALSE;
-}
-
-
-static gboolean
-pulseaudio_button_button_release (GtkWidget      *widget,
-                                  GdkEventButton *event)
-{
-  PulseaudioButton *button = PULSEAUDIO_BUTTON (widget);
-  GError *error = NULL;
-
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
-
-  if(event->button == 1) /* left button */
-    {
-      if (!xfce_spawn_command_line_on_screen (gtk_widget_get_screen (widget),
-                                              pulseaudio_config_get_mixer_command (button->config),
-                                              FALSE, FALSE, &error))
-        {
-          xfce_dialog_show_error (NULL, error, _("Failed to execute command \"%s\"."),
-                                  pulseaudio_config_get_mixer_command (button->config));
-          g_error_free (error);
-        }
-      return TRUE;
-    }
-
-  if (event->button == 2) /* middle button */
     {
       pulseaudio_volume_toggle_muted (button->volume);
       return TRUE;
@@ -267,10 +248,10 @@ pulseaudio_button_scroll_event (GtkWidget *widget, GdkEventScroll *event)
 
 static void
 pulseaudio_button_menu_deactivate (PulseaudioButton *button,
-                                   GtkMenu          *menu)
+                                   GtkMenuShell     *menu)
 {
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
-  g_return_if_fail (GTK_IS_MENU (menu));
+  g_return_if_fail (GTK_IS_MENU_SHELL (menu));
 
   if (button->deactivate_id)
     {
@@ -375,15 +356,19 @@ pulseaudio_button_volume_changed (PulseaudioButton  *button,
 
 
 GtkWidget *
-pulseaudio_button_new (PulseaudioConfig *config,
+pulseaudio_button_new (PulseaudioPlugin *plugin,
+                       PulseaudioConfig *config,
                        PulseaudioVolume *volume)
 {
   PulseaudioButton *button;
 
+  g_return_val_if_fail (IS_PULSEAUDIO_PLUGIN (plugin), NULL);
+  g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), NULL);
   g_return_val_if_fail (IS_PULSEAUDIO_VOLUME (volume), NULL);
 
   button = g_object_new (TYPE_PULSEAUDIO_BUTTON, NULL);
 
+  button->plugin = plugin;
   button->volume = volume;
   button->config = config;
   button->volume_changed_id =
