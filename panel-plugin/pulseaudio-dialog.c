@@ -119,7 +119,8 @@ static void
 pulseaudio_dialog_run_mixer (PulseaudioDialog *dialog,
                              GtkWidget        *widget)
 {
-  GError *error = NULL;
+  GError    *error = NULL;
+  GtkWidget *message_dialog;
 
   g_return_if_fail (IS_PULSEAUDIO_DIALOG (dialog));
   g_return_if_fail (GTK_IS_BUTTON (widget));
@@ -128,8 +129,18 @@ pulseaudio_dialog_run_mixer (PulseaudioDialog *dialog,
                                           pulseaudio_config_get_mixer_command (dialog->config),
                                           FALSE, FALSE, &error))
     {
-      xfce_dialog_show_error (NULL, error, _("Failed to execute command \"%s\"."),
-                              pulseaudio_config_get_mixer_command (dialog->config));
+      message_dialog = gtk_message_dialog_new_with_markup (NULL,
+                                                           GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                           GTK_MESSAGE_ERROR,
+                                                           GTK_BUTTONS_CLOSE,
+                                                           _("<big><b>Failed to execute command \"%s\".</b></big>\n\n%s"),
+                                                           pulseaudio_config_get_mixer_command (dialog->config),
+                                                           error->message);
+      gtk_window_set_title (GTK_WINDOW (message_dialog), _("Error"));
+      gtk_dialog_run (GTK_DIALOG (message_dialog));
+      gtk_widget_destroy (message_dialog);
+      //xfce_dialog_show_error (NULL, error, _("Failed to execute command \"%s\"."),
+      //                        pulseaudio_config_get_mixer_command (dialog->config));
       g_error_free (error);
     }
 }
