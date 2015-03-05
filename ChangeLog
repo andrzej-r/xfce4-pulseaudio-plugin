@@ -1,4 +1,27 @@
 # created with git log --pretty=format:"%ad %h %s %aN <%aE>" --no-merges --date=short
+2015-03-05 3d75ce7 Updated POTFILES Andrzej <ndrwrdck@gmail.com>
+2015-03-05 7870c56 Add size steps for the panel icon Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-05 0e27817 Updated a list of authors Andrzej <ndrwrdck@gmail.com>
+2015-03-05 cf836c8 Correctly calculate the icon's size Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-04 0e7146f Switching to gtk_message_dialog boxes Andrzej <ndrwrdck@gmail.com>
+2015-03-04 314286b Use symbolic icons in the panel Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-04 40ecf63 Updated text of GPL2 license (FSF address) Andrzej <ndrwrdck@gmail.com>
+2015-03-04 9edcd44 Use symbolic icon for volume Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-04 eb226f9 Removed extra items from the plugin menu. Andrzej <ndrwrdck@gmail.com>
+2015-03-04 98e08df Added a menu Andrzej <ndrwrdck@gmail.com>
+2015-03-03 5cdcd01 Deprecation fixes. Andrzej <ndrwrdck@gmail.com>
+2015-03-03 7e3bdd9 Copied scalemenuitem.c/h from xfce4-power-manager Andrzej <ndrwrdck@gmail.com>
+2015-03-03 090a053 Fixed undefined symbol, clean up. Andrzej <ndrwrdck@gmail.com>
+2015-03-03 b36fc00 Remove duplicate libtool initialization Guido Berhoerster <guido+xfce@berhoerster.name>
+2015-03-03 5d733f2 Improve documentation and description Guido Berhoerster <guido+xfce@berhoerster.name>
+2015-03-03 34b9b71 Replace deprecated AC_PROC_INTLTOOL with IT_PROG_INTLTOOL Guido Berhoerster <guido+xfce@berhoerster.name>
+2015-03-03 f09628c Replace the deprecated INCLUDES with AM_CPPFLAGS Guido Berhoerster <guido+xfce@berhoerster.name>
+2015-03-03 0352549 Make the default mixer command a compile-time option Guido Berhoerster <guido+xfce@berhoerster.name>
+2015-03-03 5057c01 Use xfce4-panel debugging methods Guido Berhoerster <guido+xfce@berhoerster.name>
+2015-03-02 c153fd5 Allow execution of the mixer from context menu Guido Berhoerster <guido+xfce@berhoerster.name>
+2015-03-02 3af1719 Check for LIBM Andrzej <ndrwrdck@gmail.com>
+2015-02-19 061f527 Back to development Andrzej <ndrwrdck@gmail.com>
+2015-02-19 8b637f3 Updates for a release Andrzej <ndrwrdck@gmail.com>
 2015-02-18 3124c91 make distcheck fixes Andrzej <ndrwrdck@gmail.com>
 2015-02-18 58685d5 i18n fixes Andrzej <ndrwrdck@gmail.com>
 2015-02-18 d68d6b8 Run mixer application when plugin button is clicked. Andrzej <ndrwrdck@gmail.com>
