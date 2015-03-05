@@ -266,10 +266,9 @@ pulseaudio_button_menu_deactivate (PulseaudioButton *button,
 static void
 pulseaudio_button_update_icons (PulseaudioButton *button)
 {
-  guint           i;
-  GtkIconInfo    *info;
-  GtkStyleContext *context;
-  gboolean is_symbolic;
+  guint             i;
+  GtkIconInfo      *info;
+  GtkStyleContext  *context;
 
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
 
@@ -332,10 +331,23 @@ void
 pulseaudio_button_set_size (PulseaudioButton *button,
                             gint              size)
 {
+  GtkStyleContext  *context;
+  GtkBorder         padding;
+  GtkBorder         border;
+  gint              xthickness;
+  gint              ythickness;
+
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
   g_return_if_fail (size > 0);
 
-  button->icon_size = size - 4;
+  /* Get widget's padding and border to correctly calculate the button's icon size */
+  context = gtk_widget_get_style_context (GTK_WIDGET (button));
+  gtk_style_context_get_padding (context, gtk_widget_get_state_flags (GTK_WIDGET (button)), &padding);
+  gtk_style_context_get_border (context, gtk_widget_get_state_flags (GTK_WIDGET (button)), &border);
+  xthickness = padding.left+padding.right+border.left+border.right;
+  ythickness = padding.top+padding.bottom+border.top+border.bottom;
+
+  button->icon_size = size - 2* MAX (xthickness, ythickness);
   gtk_widget_set_size_request (GTK_WIDGET (button), size, size);
   pulseaudio_button_update_icons (button);
 }
