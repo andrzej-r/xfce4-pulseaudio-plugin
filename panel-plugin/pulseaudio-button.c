@@ -335,6 +335,7 @@ pulseaudio_button_set_size (PulseaudioButton *button,
   GtkStyleContext  *context;
   GtkBorder         padding;
   GtkBorder         border;
+  gint              width;
   gint              xthickness;
   gint              ythickness;
 
@@ -348,7 +349,18 @@ pulseaudio_button_set_size (PulseaudioButton *button,
   xthickness = padding.left+padding.right+border.left+border.right;
   ythickness = padding.top+padding.bottom+border.top+border.bottom;
 
-  button->icon_size = size - 2* MAX (xthickness, ythickness);
+  width = size - 2* MAX (xthickness, ythickness);
+  /* Since symbolic icons are usually only provided in 16px we
+   * try to be clever and use size steps */
+  if (width <= 21)
+      button->icon_size = 16;
+  else if (width >=22 && width <= 29)
+      button->icon_size = 24;
+  else if (width >= 30 && width <= 40)
+      button->icon_size = 32;
+  else
+      button->icon_size = width;
+
   gtk_widget_set_size_request (GTK_WIDGET (button), size, size);
   pulseaudio_button_update_icons (button);
 }
