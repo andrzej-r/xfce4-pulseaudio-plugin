@@ -175,6 +175,7 @@ pulseaudio_menu_volume_changed (PulseaudioMenu   *menu,
                                 PulseaudioVolume *volume)
 {
   g_return_if_fail (IS_PULSEAUDIO_MENU (menu));
+  g_return_if_fail (IS_PULSEAUDIO_VOLUME (volume));
 
   g_signal_handlers_block_by_func (G_OBJECT (menu->mute_output_item),
                                    pulseaudio_menu_mute_output_item_toggled,

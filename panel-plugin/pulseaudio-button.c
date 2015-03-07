@@ -139,7 +139,7 @@ pulseaudio_button_init (PulseaudioButton *button)
   /* Preload icons */
   button->pixbuf_idx = 0;
   button->pixbufs = g_new0 (GdkPixbuf*, G_N_ELEMENTS (icons)-1);
-  g_signal_connect (G_OBJECT (button), "style_updated", G_CALLBACK (pulseaudio_button_update_icons), button); 
+  g_signal_connect (G_OBJECT (button), "style-updated", G_CALLBACK (pulseaudio_button_update_icons), button);
 
   /* Setup Gtk style */
   css_provider = gtk_css_provider_new ();
@@ -162,8 +162,6 @@ pulseaudio_button_init (PulseaudioButton *button)
   gtk_widget_show (button->image);
 
   g_object_set (G_OBJECT (button), "has-tooltip", TRUE, NULL);
-
-  pulseaudio_button_update (button, TRUE);
 
   //button->align_box = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
   //gtk_container_add (GTK_CONTAINER (button), button->align_box);
@@ -299,6 +297,7 @@ pulseaudio_button_update (PulseaudioButton *button,
   gchar    *tip_text;
 
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
+  g_return_if_fail (IS_PULSEAUDIO_VOLUME (button->volume));
 
   volume = pulseaudio_volume_get_volume (button->volume);
   muted = pulseaudio_volume_get_muted (button->volume);
@@ -338,6 +337,7 @@ pulseaudio_button_set_size (PulseaudioButton *button,
   gint              width;
   gint              xthickness;
   gint              ythickness;
+  gint              size_old;
 
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
   g_return_if_fail (size > 0);
@@ -352,6 +352,7 @@ pulseaudio_button_set_size (PulseaudioButton *button,
   width = size - 2* MAX (xthickness, ythickness);
   /* Since symbolic icons are usually only provided in 16px we
    * try to be clever and use size steps */
+  size_old = button->icon_size;
   if (width <= 21)
       button->icon_size = 16;
   else if (width >=22 && width <= 29)
@@ -362,7 +363,8 @@ pulseaudio_button_set_size (PulseaudioButton *button,
       button->icon_size = width;
 
   gtk_widget_set_size_request (GTK_WIDGET (button), size, size);
-  pulseaudio_button_update_icons (button);
+  if (button->icon_size != size_old)
+    pulseaudio_button_update_icons (button);
 }
 
 
@@ -397,6 +399,8 @@ pulseaudio_button_new (PulseaudioPlugin *plugin,
   button->volume_changed_id =
     g_signal_connect_swapped (G_OBJECT (button->volume), "volume-changed",
                               G_CALLBACK (pulseaudio_button_volume_changed), button);
+
+  pulseaudio_button_update (button, TRUE);
 
   return GTK_WIDGET (button);
 }
