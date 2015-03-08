@@ -252,8 +252,14 @@ scale_menu_item_button_press_event (GtkWidget      *menuitem,
   gtk_widget_translate_coordinates (menuitem, priv->scale, event->x, event->y, &x, &y);
 
   if (x > 0 && x < alloc.width && y > 0 && y < alloc.height)
-    gtk_widget_event (priv->scale,
-                      ((GdkEvent *)(void*)(event)));
+    {
+#if !(GTK_CHECK_VERSION (3, 14, 0))
+      /* event coordinates are supposed to refer to GdkWindow but for some reason in Gtk+-3.12(?) they refer to the widget */
+      event->x = (gdouble) x;
+      event->y = (gdouble) y;
+#endif
+      gtk_widget_event (priv->scale, (GdkEvent*) event);
+    }
 
   if (!priv->grabbed)
     {
@@ -269,9 +275,15 @@ scale_menu_item_button_release_event (GtkWidget *menuitem,
                                       GdkEventButton *event)
 {
   ScaleMenuItemPrivate *priv = GET_PRIVATE (menuitem);
+  gint x, y;
 
   TRACE("entering");
 
+#if !(GTK_CHECK_VERSION (3, 14, 0))
+  gtk_widget_translate_coordinates (menuitem, priv->scale, event->x, event->y, &x, &y);
+  event->x = (gdouble) x;
+  event->y = (gdouble) y;
+#endif
   gtk_widget_event (priv->scale, (GdkEvent*)event);
 
   if (priv->grabbed)
@@ -296,9 +308,14 @@ scale_menu_item_motion_notify_event (GtkWidget      *menuitem,
   gtk_widget_get_allocation (priv->scale, &alloc);
   gtk_widget_translate_coordinates (menuitem, priv->scale, event->x, event->y, &x, &y);
 
-  if (priv->grabbed ||
-      (x > 0 && x < alloc.width && y > 0 && y < alloc.height))
-    gtk_widget_event (scale, (GdkEvent*) event);
+  if (x > 0 && x < alloc.width && y > 0 && y < alloc.height)
+    {
+#if !(GTK_CHECK_VERSION (3, 14, 0))
+      event->x = (gdouble) x;
+      event->y = (gdouble) y;
+#endif
+      gtk_widget_event (scale, (GdkEvent*) event);
+    }
 
   return TRUE;
 }
