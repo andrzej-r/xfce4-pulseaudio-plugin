@@ -84,11 +84,6 @@ XDT_CHECK_PACKAGE([LIBXFCE4UI], [libxfce4ui-2], [4.11.0])
 XDT_CHECK_PACKAGE([LIBXFCE4PANEL], [libxfce4panel-${LIBXFCE4PANEL_VERSION_API}], [4.11.0])
 XDT_CHECK_PACKAGE([XFCONF], [libxfconf-0], [4.6.0])
 
-dnl ****************************
-dnl *** Optional IDO library ***
-dnl ****************************
-XDT_CHECK_OPTIONAL_PACKAGE([IDO], [libido3-0.1], [13.10.0], [ido], [IDO library])
-
 dnl **********************************
 dnl *** Optional keybinder Support ***
 dnl **********************************
@@ -143,6 +138,5 @@ echo "Build Configuration:"
 echo
 echo "* Debug Support:          $enable_debug"
 echo "* Use keybinder:          ${KEYBINDER_FOUND:-no}"
-echo "* Use IDO library:        ${IDO_FOUND:-no}"
 echo "* Default Mixer command:  $DEFAULT_MIXER_COMMAND"
 echo

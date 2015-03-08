@@ -47,7 +47,6 @@ libpulseaudio_plugin_la_CFLAGS = \
 	$(LIBXFCE4UI_CFLAGS) \
 	$(LIBXFCE4PANEL_CFLAGS) \
 	$(XFCONF_CFLAGS) \
-	$(IDO_CFLAGS) \
 	$(KEYBINDER_CFLAGS) \
 	$(PLATFORM_CFLAGS)
 
@@ -66,7 +65,6 @@ libpulseaudio_plugin_la_LIBADD = \
 	$(LIBXFCE4UI_LIBS) \
 	$(LIBXFCE4PANEL_LIBS) \
 	$(XFCONF_LIBS) \
-	$(IDO_LIBS) \
 	$(KEYBINDER_LIBS) \
 	$(LIBM)
 
