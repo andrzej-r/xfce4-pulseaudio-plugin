@@ -199,22 +199,25 @@ pulseaudio_button_button_press (GtkWidget      *widget,
 {
   PulseaudioButton *button = PULSEAUDIO_BUTTON (widget);
 
-  if(event->button == 1) /* left button */
+  if(event->button == 1 && button->menu == NULL) /* left button */
     {
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
-      if (button->menu == NULL)
-          button->menu = pulseaudio_menu_new (button->volume, button->config, widget);
+      button->menu = pulseaudio_menu_new (button->volume, button->config, widget);
+      gtk_menu_attach_to_widget (GTK_MENU (button->menu), widget, NULL);
+
       if (button->deactivate_id == 0)
+        {
           button->deactivate_id = g_signal_connect_swapped
             (GTK_MENU_SHELL (button->menu), "deactivate",
              G_CALLBACK (pulseaudio_button_menu_deactivate), button);
+        }
 
       gtk_menu_popup (GTK_MENU (button->menu),
                       NULL, NULL,
                       xfce_panel_plugin_position_menu, button->plugin,
                       //NULL, NULL,
-                      0,
-                      gtk_get_current_event_time ());
+                      1,
+                      event->time);
       return TRUE;
     }
 
@@ -256,6 +259,13 @@ pulseaudio_button_menu_deactivate (PulseaudioButton *button,
     {
       g_signal_handler_disconnect (menu, button->deactivate_id);
       button->deactivate_id = 0;
+    }
+
+  if (button->menu != NULL)
+    {
+      gtk_menu_detach (GTK_MENU (button->menu));
+      gtk_menu_popdown (GTK_MENU (button->menu));
+      button->menu = NULL;
     }
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
