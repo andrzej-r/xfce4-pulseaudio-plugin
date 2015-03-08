@@ -89,7 +89,7 @@ static void
 scale_menu_item_scale_value_changed (GtkRange *range,
                                      gpointer  user_data)
 {
-  ScaleMenuItem *self = user_data;
+  ScaleMenuItem        *self = SCALE_MENU_ITEM (user_data);
   ScaleMenuItemPrivate *priv = GET_PRIVATE (self);
 
   /* The signal is not sent when it was set through
@@ -165,8 +165,13 @@ scale_menu_item_class_init (ScaleMenuItemClass *item_class)
 static void
 remove_children (GtkContainer *container)
 {
-  GList * children = gtk_container_get_children (container);
+  GList * children;
   GList * l;
+
+  g_return_if_fail (GTK_IS_CONTAINER (container));
+
+  children = gtk_container_get_children (container);
+
   for (l=children; l!=NULL; l=l->next)
     gtk_container_remove (container, l->data);
   g_list_free (children);
@@ -175,9 +180,15 @@ remove_children (GtkContainer *container)
 static void
 update_packing (ScaleMenuItem *self)
 {
-  ScaleMenuItemPrivate *priv = GET_PRIVATE (self);
-  GtkBox *hbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
-  GtkBox *vbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  ScaleMenuItemPrivate *priv;
+  GtkBox               *hbox;
+  GtkBox               *vbox;
+
+  g_return_if_fail (IS_SCALE_MENU_ITEM (self));
+
+  priv = GET_PRIVATE (self);
+  hbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  vbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
   TRACE("entering");
 
@@ -242,11 +253,15 @@ static gboolean
 scale_menu_item_button_press_event (GtkWidget      *menuitem,
                                     GdkEventButton *event)
 {
-  ScaleMenuItemPrivate *priv = GET_PRIVATE (menuitem);
-  GtkAllocation alloc;
-  gint x, y;
+  ScaleMenuItemPrivate *priv;
+  GtkAllocation         alloc;
+  gint                  x, y;
 
   TRACE("entering");
+
+  g_return_val_if_fail (IS_SCALE_MENU_ITEM (menuitem), FALSE);
+
+  priv = GET_PRIVATE (menuitem);
 
   gtk_widget_get_allocation (priv->scale, &alloc);
   gtk_widget_translate_coordinates (menuitem, priv->scale, event->x, event->y, &x, &y);
@@ -271,13 +286,17 @@ scale_menu_item_button_press_event (GtkWidget      *menuitem,
 }
 
 static gboolean
-scale_menu_item_button_release_event (GtkWidget *menuitem,
+scale_menu_item_button_release_event (GtkWidget      *menuitem,
                                       GdkEventButton *event)
 {
-  ScaleMenuItemPrivate *priv = GET_PRIVATE (menuitem);
-  gint x, y;
+  ScaleMenuItemPrivate *priv;
+  gint                  x, y;
 
   TRACE("entering");
+
+  g_return_val_if_fail (IS_SCALE_MENU_ITEM (menuitem), FALSE);
+
+  priv = GET_PRIVATE (menuitem);
 
 #if !(GTK_CHECK_VERSION (3, 14, 0))
   gtk_widget_translate_coordinates (menuitem, priv->scale, event->x, event->y, &x, &y);
@@ -300,10 +319,15 @@ static gboolean
 scale_menu_item_motion_notify_event (GtkWidget      *menuitem,
                                      GdkEventMotion *event)
 {
-  ScaleMenuItemPrivate *priv = GET_PRIVATE (menuitem);
-  GtkWidget *scale = priv->scale;
-  GtkAllocation alloc;
-  gint x, y;
+  ScaleMenuItemPrivate *priv;
+  GtkWidget            *scale;
+  GtkAllocation         alloc;
+  gint                  x, y;
+
+  g_return_val_if_fail (IS_SCALE_MENU_ITEM (menuitem), FALSE);
+
+  priv = GET_PRIVATE (menuitem);
+  scale = priv->scale;
 
   gtk_widget_get_allocation (priv->scale, &alloc);
   gtk_widget_translate_coordinates (menuitem, priv->scale, event->x, event->y, &x, &y);
@@ -322,20 +346,28 @@ scale_menu_item_motion_notify_event (GtkWidget      *menuitem,
 
 static void
 scale_menu_item_grab_notify (GtkWidget *menuitem,
-                             gboolean was_grabbed)
+                             gboolean   was_grabbed)
 {
-  ScaleMenuItemPrivate *priv = GET_PRIVATE (menuitem);
+  ScaleMenuItemPrivate *priv;
 
   TRACE("entering");
+
+  g_return_if_fail (IS_SCALE_MENU_ITEM (menuitem));
+
+  priv = GET_PRIVATE (menuitem);
 
   GTK_WIDGET_GET_CLASS (priv->scale)->grab_notify (priv->scale, was_grabbed);
 }
 
 static gboolean
-scale_menu_item_grab_broken (GtkWidget *menuitem,
+scale_menu_item_grab_broken (GtkWidget          *menuitem,
                              GdkEventGrabBroken *event)
 {
-  ScaleMenuItemPrivate *priv = GET_PRIVATE (menuitem);
+  ScaleMenuItemPrivate *priv;
+
+  g_return_val_if_fail (IS_SCALE_MENU_ITEM (menuitem), FALSE);
+
+  priv = GET_PRIVATE (menuitem);
 
   TRACE("entering");
 
@@ -345,10 +377,15 @@ scale_menu_item_grab_broken (GtkWidget *menuitem,
 }
 
 static void
-menu_hidden (GtkWidget        *menu,
+menu_hidden (GtkWidget     *menu,
              ScaleMenuItem *scale)
 {
-  ScaleMenuItemPrivate *priv = GET_PRIVATE (scale);
+  ScaleMenuItemPrivate *priv;
+
+  g_return_if_fail (IS_SCALE_MENU_ITEM (scale));
+  g_return_if_fail (GTK_IS_MENU (menu));
+
+  priv = GET_PRIVATE (scale);
 
   if (priv->grabbed)
     {
@@ -364,14 +401,16 @@ scale_menu_item_parent_set (GtkWidget *item,
 {
   GtkWidget *parent;
 
-  if (previous_parent)
+  g_return_if_fail (IS_SCALE_MENU_ITEM (item));
+
+  if (previous_parent != NULL)
     {
       g_signal_handlers_disconnect_by_func (previous_parent, menu_hidden, item);
     }
 
   parent = gtk_widget_get_parent (item);
 
-  if (parent)
+  if (parent != NULL)
     {
       g_signal_connect (parent, "hide", G_CALLBACK (menu_hidden), item);
     }
@@ -384,7 +423,7 @@ scale_menu_item_new_with_range (gdouble           min,
                                 gdouble           max,
                                 gdouble           step)
 {
-  ScaleMenuItem *scale_item;
+  ScaleMenuItem        *scale_item;
   ScaleMenuItemPrivate *priv;
 
   TRACE("entering");
@@ -480,7 +519,7 @@ scale_menu_item_get_percentage_label (ScaleMenuItem *menuitem)
  **/
 void
 scale_menu_item_set_description_label (ScaleMenuItem *menuitem,
-                                       const gchar      *label)
+                                       const gchar   *label)
 {
   ScaleMenuItemPrivate *priv;
 
@@ -524,7 +563,7 @@ scale_menu_item_set_description_label (ScaleMenuItem *menuitem,
  **/
 void
 scale_menu_item_set_percentage_label (ScaleMenuItem *menuitem,
-                                      const gchar      *label)
+                                      const gchar   *label)
 {
   ScaleMenuItemPrivate *priv;
 
@@ -566,7 +605,11 @@ void
 scale_menu_item_set_value (ScaleMenuItem *item,
                            gdouble        value)
 {
-  ScaleMenuItemPrivate *priv = GET_PRIVATE (item);
+  ScaleMenuItemPrivate *priv;
+
+  g_return_if_fail (IS_SCALE_MENU_ITEM (item));
+
+  priv = GET_PRIVATE (item);
 
   /* set ignore_value_changed to signify to the scale menu item that it
    * should not emit its own value-changed signal, as that should only
