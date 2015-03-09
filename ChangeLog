@@ -1,4 +1,12 @@
 # created with git log --pretty=format:"%ad %h %s %aN <%aE>" --no-merges --date=short
+2015-03-08 bdc61d0 Fixed a crash in menu popup/popdown Andrzej <ndrwrdck@gmail.com>
+2015-03-08 0d64623 ScaleMenuItem clean-up and extra asserts Andrzej <ndrwrdck@gmail.com>
+2015-03-08 06f8b30 Removed unused IDO library dependency Andrzej <ndrwrdck@gmail.com>
+2015-03-08 3d42561 Fixed slider click/drag coordinate errors in Gtk3.14 Andrzej <ndrwrdck@gmail.com>
+2015-03-05 42eeba8 Fix the scale's slider behaving weird on click-drag with Gtk3.14 Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-07 d84fbe6 Added extra checks Andrzej <ndrwrdck@gmail.com>
+2015-03-05 2657a11 Back to development Andrzej <ndrwrdck@gmail.com>
+2015-03-05 1be7d40 Updates for a release Andrzej <ndrwrdck@gmail.com>
 2015-03-05 3d75ce7 Updated POTFILES Andrzej <ndrwrdck@gmail.com>
 2015-03-05 7870c56 Add size steps for the panel icon Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
 2015-03-05 0e27817 Updated a list of authors Andrzej <ndrwrdck@gmail.com>
