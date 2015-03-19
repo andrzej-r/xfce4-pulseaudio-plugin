@@ -76,9 +76,11 @@ static void
 pulseaudio_menu_init (PulseaudioMenu *menu)
 {
   menu->volume                         = NULL;
+  menu->config                         = NULL;
   menu->button                         = NULL;
   menu->range_output                   = NULL;
   menu->mute_output_item               = NULL;
+  menu->volume_changed_id              = 0;
 }
 
 
@@ -88,6 +90,16 @@ pulseaudio_menu_finalize (GObject *object)
   PulseaudioMenu *menu;
 
   menu = PULSEAUDIO_MENU (object);
+
+  if (menu->volume_changed_id != 0)
+    g_signal_handler_disconnect (G_OBJECT (menu->volume), menu->volume_changed_id);
+
+  menu->volume                         = NULL;
+  menu->config                         = NULL;
+  menu->button                         = NULL;
+  menu->range_output                   = NULL;
+  menu->mute_output_item               = NULL;
+  menu->volume_changed_id              = 0;
 
   G_OBJECT_CLASS (pulseaudio_menu_parent_class)->finalize (object);
 }
