@@ -29,6 +29,7 @@
 #include <gtk/gtk.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include <libxfce4util/libxfce4util.h>
+#include <libxfce4ui/libxfce4ui.h>
 
 #include "pulseaudio-menu.h"
 #include "scalemenuitem.h"
@@ -62,12 +63,9 @@ static void
 pulseaudio_menu_class_init (PulseaudioMenuClass *klass)
 {
   GObjectClass      *gobject_class;
-  GtkWidgetClass    *gtkwidget_class;
 
   gobject_class = G_OBJECT_CLASS (klass);
   gobject_class->finalize = pulseaudio_menu_finalize;
-
-  gtkwidget_class = GTK_WIDGET_CLASS (klass);
 }
 
 

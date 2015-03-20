@@ -290,7 +290,6 @@ pulseaudio_plugin_volume_key_pressed (const char            *keystring,
   PulseaudioPlugin *pulseaudio_plugin = PULSEAUDIO_PLUGIN (user_data);
   gdouble           volume            = pulseaudio_volume_get_volume (pulseaudio_plugin->volume);
   gdouble           volume_step       = pulseaudio_config_get_volume_step (pulseaudio_plugin->config) / 100.0;
-  gdouble           new_volume;
 
   pulseaudio_debug ("%s pressed", keystring);
 
