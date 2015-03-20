@@ -212,9 +212,6 @@ pulseaudio_menu_new (PulseaudioVolume *volume,
   GdkScreen      *gscreen;
   GtkWidget      *mi;
   GtkWidget      *img = NULL;
-  GdkPixbuf      *pix;
-  GtkIconInfo    *info;
-  GtkStyleContext *context;
 
   g_return_val_if_fail (IS_PULSEAUDIO_VOLUME (volume), NULL);
   g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), NULL);
@@ -239,15 +236,9 @@ pulseaudio_menu_new (PulseaudioVolume *volume,
   /* output volume slider */
   mi = scale_menu_item_new_with_range (0.0, 100.0, 1.0);
 
-  /* attempt to load and display the brightness icon */
-  context = gtk_widget_get_style_context (GTK_WIDGET (mi));
-  info = gtk_icon_theme_lookup_icon (gtk_icon_theme_get_default (), "audio-volume-high-symbolic", 24, GTK_ICON_LOOKUP_GENERIC_FALLBACK);
-  pix = gtk_icon_info_load_symbolic_for_context (info, context, NULL, NULL);
-  if (pix)
-    {
-      img = gtk_image_new_from_pixbuf (pix);
-      gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (mi), img);
-    }
+  img = gtk_image_new_from_icon_name ("audio-volume-high-symbolic", GTK_ICON_SIZE_DND);
+  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (mi), img);
+  gtk_image_set_pixel_size (GTK_IMAGE (img), 24);
 
   scale_menu_item_set_description_label (SCALE_MENU_ITEM (mi), _("<b>Audio output volume</b>"));
 
