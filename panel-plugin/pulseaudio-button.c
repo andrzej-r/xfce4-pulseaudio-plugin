@@ -88,10 +88,6 @@ struct _PulseaudioButton
   gint                  icon_size;
   gint                  size;
 
-  /* Array of preloaded icons */
-  guint                 pixbuf_idx;
-  GdkPixbuf           **pixbufs;
-
   GtkWidget            *menu;
 
   gulong                volume_changed_id;
@@ -137,8 +133,6 @@ pulseaudio_button_init (PulseaudioButton *button)
   gtk_widget_set_name (GTK_WIDGET (button), "pulseaudio-button");
 
   /* Preload icons */
-  button->pixbuf_idx = 0;
-  button->pixbufs = g_new0 (GdkPixbuf*, G_N_ELEMENTS (icons)-1);
   g_signal_connect (G_OBJECT (button), "style-updated", G_CALLBACK (pulseaudio_button_update_icons), button);
 
   /* Setup Gtk style */
@@ -157,7 +151,7 @@ pulseaudio_button_init (PulseaudioButton *button)
   button->volume_changed_id = 0;
   button->deactivate_id = 0;
 
-  button->image = xfce_panel_image_new ();
+  button->image = gtk_image_new ();
   gtk_container_add (GTK_CONTAINER (button), button->image);
   gtk_widget_show (button->image);
 
@@ -175,12 +169,6 @@ pulseaudio_button_finalize (GObject *object)
 {
   PulseaudioButton *button = PULSEAUDIO_BUTTON (object);
   guint             i;
-
-  /* Free pre-allocated icon pixbufs */
-  for (i = 0; i < G_N_ELEMENTS (icons)-1; ++i)
-    if (GDK_IS_PIXBUF (button->pixbufs[i]))
-      g_object_unref (G_OBJECT (button->pixbufs[i]));
-  g_free (button->pixbufs);
 
   if (button->menu != NULL)
     {
@@ -275,23 +263,6 @@ pulseaudio_button_menu_deactivate (PulseaudioButton *button,
 static void
 pulseaudio_button_update_icons (PulseaudioButton *button)
 {
-  guint             i;
-  GtkIconInfo      *info;
-  GtkStyleContext  *context;
-
-  g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
-
-  context = GTK_STYLE_CONTEXT (gtk_widget_get_style_context (GTK_WIDGET (gtk_widget_get_parent (GTK_WIDGET (button)))));
-
-  /* Pre-load all icons */
-  for (i = 0; i < G_N_ELEMENTS (icons)-1; ++i)
-    {
-      if (GDK_IS_PIXBUF (button->pixbufs[i]))
-        g_object_unref (G_OBJECT (button->pixbufs[i]));
-        info = gtk_icon_theme_lookup_icon (gtk_icon_theme_get_default (), icons[i], button->icon_size, GTK_ICON_LOOKUP_USE_BUILTIN);
-        button->pixbufs[i] = gtk_icon_info_load_symbolic_for_context (info, context, NULL, NULL);
-    }
-
   /* Update the state of the button */
   pulseaudio_button_update (button, TRUE);
 }
@@ -301,10 +272,10 @@ static void
 pulseaudio_button_update (PulseaudioButton *button,
                           gboolean          force_update)
 {
-  guint     idx;
   gdouble   volume;
   gboolean  muted;
   gchar    *tip_text;
+  const gchar    *icon_name;
 
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
   g_return_if_fail (IS_PULSEAUDIO_VOLUME (button->volume));
@@ -312,15 +283,15 @@ pulseaudio_button_update (PulseaudioButton *button,
   volume = pulseaudio_volume_get_volume (button->volume);
   muted = pulseaudio_volume_get_muted (button->volume);
   if (muted)
-    idx = V_MUTED;
+    icon_name = icons[0];
   else if (volume <= 0.0)
-    idx = V_MUTED;
+    icon_name = icons[0];
   else if (volume <= 0.3)
-    idx = V_LOW;
+    icon_name = icons[1];
   else if (volume <= 0.7)
-    idx = V_MEDIUM;
+    icon_name = icons[2];
   else
-    idx = V_HIGH;
+    icon_name = icons[3];
 
   if (muted)
     tip_text = g_strdup_printf (_("Volume %d%% (muted)"), (gint) round (volume * 100));
@@ -329,11 +300,11 @@ pulseaudio_button_update (PulseaudioButton *button,
   gtk_widget_set_tooltip_text (GTK_WIDGET (button), tip_text);
   g_free (tip_text);
 
-  if (force_update || button->pixbuf_idx != idx)
-    {
-      button->pixbuf_idx = idx;
-      xfce_panel_image_set_from_pixbuf (XFCE_PANEL_IMAGE (button->image), button->pixbufs[button->pixbuf_idx]);
-    }
+  if (force_update)
+  {
+    gtk_image_set_from_icon_name (GTK_IMAGE (button->image), icon_name, GTK_ICON_SIZE_BUTTON);
+    gtk_image_set_pixel_size (GTK_IMAGE (button->image), button->icon_size);
+  }
 }
 
 
@@ -385,7 +356,7 @@ pulseaudio_button_volume_changed (PulseaudioButton  *button,
 {
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
 
-  pulseaudio_button_update (button, FALSE);
+  pulseaudio_button_update (button, TRUE);
 }
 
 
