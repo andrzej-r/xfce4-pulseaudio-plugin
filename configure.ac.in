@@ -125,6 +125,8 @@ Makefile
 icons/Makefile
 icons/48x48/Makefile
 icons/scalable/Makefile
+icons/scalable/apps/Makefile
+icons/scalable/status/Makefile
 panel-plugin/Makefile
 panel-plugin/pulseaudio.desktop.in
 po/Makefile.in
