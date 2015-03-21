@@ -86,7 +86,7 @@ struct _PulseaudioButton
 
   /* Icon size currently used */
   gint                  icon_size;
-  gint                  size;
+  const gchar          *icon_name;
 
   GtkWidget            *menu;
 
@@ -146,6 +146,8 @@ pulseaudio_button_init (PulseaudioButton *button)
   button->plugin = NULL;
   button->config = NULL;
   button->volume = NULL;
+  button->icon_size = 16;
+  button->icon_name = NULL;
 
   button->menu = NULL;
   button->volume_changed_id = 0;
@@ -168,7 +170,6 @@ static void
 pulseaudio_button_finalize (GObject *object)
 {
   PulseaudioButton *button = PULSEAUDIO_BUTTON (object);
-  guint             i;
 
   if (button->menu != NULL)
     {
@@ -272,10 +273,10 @@ static void
 pulseaudio_button_update (PulseaudioButton *button,
                           gboolean          force_update)
 {
-  gdouble   volume;
-  gboolean  muted;
-  gchar    *tip_text;
-  const gchar    *icon_name;
+  gdouble      volume;
+  gboolean     muted;
+  gchar       *tip_text;
+  const gchar *icon_name;
 
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
   g_return_if_fail (IS_PULSEAUDIO_VOLUME (button->volume));
@@ -300,11 +301,12 @@ pulseaudio_button_update (PulseaudioButton *button,
   gtk_widget_set_tooltip_text (GTK_WIDGET (button), tip_text);
   g_free (tip_text);
 
-  if (force_update)
-  {
-    gtk_image_set_from_icon_name (GTK_IMAGE (button->image), icon_name, GTK_ICON_SIZE_BUTTON);
-    gtk_image_set_pixel_size (GTK_IMAGE (button->image), button->icon_size);
-  }
+  if (force_update || icon_name != button->icon_name)
+    {
+      button->icon_name = icon_name;
+      gtk_image_set_from_icon_name (GTK_IMAGE (button->image), icon_name, GTK_ICON_SIZE_BUTTON);
+      gtk_image_set_pixel_size (GTK_IMAGE (button->image), button->icon_size);
+    }
 }
 
 
@@ -356,7 +358,7 @@ pulseaudio_button_volume_changed (PulseaudioButton  *button,
 {
   g_return_if_fail (IS_PULSEAUDIO_BUTTON (button));
 
-  pulseaudio_button_update (button, TRUE);
+  pulseaudio_button_update (button, FALSE);
 }
 
 
