@@ -284,15 +284,15 @@ pulseaudio_button_update (PulseaudioButton *button,
   volume = pulseaudio_volume_get_volume (button->volume);
   muted = pulseaudio_volume_get_muted (button->volume);
   if (muted)
-    icon_name = icons[0];
+    icon_name = icons[V_MUTED];
   else if (volume <= 0.0)
-    icon_name = icons[0];
+    icon_name = icons[V_MUTED];
   else if (volume <= 0.3)
-    icon_name = icons[1];
+    icon_name = icons[V_LOW];
   else if (volume <= 0.7)
-    icon_name = icons[2];
+    icon_name = icons[V_MEDIUM];
   else
-    icon_name = icons[3];
+    icon_name = icons[V_HIGH];
 
   if (muted)
     tip_text = g_strdup_printf (_("Volume %d%% (muted)"), (gint) round (volume * 100));
