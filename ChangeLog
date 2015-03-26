@@ -1,4 +1,18 @@
 # created with git log --pretty=format:"%ad %h %s %aN <%aE>" --no-merges --date=short
+2015-03-26 3f7b531 Updated po/Makefile.in.in Andrzej <ndrwrdck@gmail.com>
+2015-03-21 d545681 Create new icon for the plugin Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-21 7b2057f Install the audio volume icons in hicolor Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-21 2fc9c2e Improve the label for audio mixer Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-21 1ac5a5b Use the appropriate constants for volume levels Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-21 b51ef49 Clean up and prevent frequent updates when icon_name hasn't changed Andrzej <ndrwrdck@gmail.com>
+2015-03-21 7cf51c4 Simplify loading the icons for the panel button Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-20 275f795 Clean up some compilation warnings Andrzej <ndrwrdck@gmail.com>
+2015-03-20 fc315b4 Simplify icon-loading in the menu Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
+2015-03-19 4fc9544 Remove grab-broken Andrzej <ndrwrdck@gmail.com>
+2015-03-19 9242604 Disconnect events and cleanup Andrzej <ndrwrdck@gmail.com>
+2015-03-18 8685476 Removed grab_notify to avoid crashes Andrzej <ndrwrdck@gmail.com>
+2015-03-09 caa4aba Back to development Andrzej <ndrwrdck@gmail.com>
+2015-03-09 ae45380 Updates for a release Andrzej <ndrwrdck@gmail.com>
 2015-03-08 bdc61d0 Fixed a crash in menu popup/popdown Andrzej <ndrwrdck@gmail.com>
 2015-03-08 0d64623 ScaleMenuItem clean-up and extra asserts Andrzej <ndrwrdck@gmail.com>
 2015-03-08 06f8b30 Removed unused IDO library dependency Andrzej <ndrwrdck@gmail.com>
