@@ -1,4 +1,4 @@
-/*  Copyright (c) 2014 Andrzej <ndrwrdck@gmail.com>
+/*  Copyright (c) 2014-2015 Andrzej <ndrwrdck@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@
 #define __PULSEAUDIO_VOLUME_H__
 
 #include <glib-object.h>
+#include "pulseaudio-config.h"
 
 G_BEGIN_DECLS
 
@@ -34,7 +35,7 @@ typedef struct          _PulseaudioVolumeClass            PulseaudioVolumeClass;
 
 GType                   pulseaudio_volume_get_type        (void) G_GNUC_CONST;
 
-PulseaudioVolume       *pulseaudio_volume_new             ();
+PulseaudioVolume       *pulseaudio_volume_new             (PulseaudioConfig *config);
 
 gdouble                 pulseaudio_volume_get_volume      (PulseaudioVolume *volume);
 void                    pulseaudio_volume_set_volume      (PulseaudioVolume *volume,

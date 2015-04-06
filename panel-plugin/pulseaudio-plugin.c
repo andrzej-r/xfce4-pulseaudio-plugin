@@ -348,7 +348,7 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
 #endif
 
   /* volume controller */
-  pulseaudio_plugin->volume = pulseaudio_volume_new ();
+  pulseaudio_plugin->volume = pulseaudio_volume_new (pulseaudio_plugin->config);
 
   /* instantiate a button box */
   pulseaudio_plugin->button = pulseaudio_button_new (pulseaudio_plugin,

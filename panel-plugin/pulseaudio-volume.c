@@ -1,4 +1,4 @@
-/*  Copyright (c) 2014 Andrzej <ndrwrdck@gmail.com>
+/*  Copyright (c) 2014-2015 Andrzej <ndrwrdck@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -32,18 +32,24 @@
 #include <pulse/pulseaudio.h>
 #include <pulse/glib-mainloop.h>
 
+#include "pulseaudio-config.h"
 #include "pulseaudio-debug.h"
 #include "pulseaudio-volume.h"
 
 
 static void                 pulseaudio_volume_finalize        (GObject            *object);
 static void                 pulseaudio_volume_connect         (PulseaudioVolume   *volume);
-static gdouble              pulseaudio_volume_v2d             (pa_volume_t         vol);
+static gdouble              pulseaudio_volume_v2d             (PulseaudioVolume   *volume,
+                                                               pa_volume_t         vol);
+static pa_volume_t          pulseaudio_volume_d2v             (PulseaudioVolume   *volume,
+                                                               gdouble             vol);
 
 
 struct _PulseaudioVolume
 {
   GObject               __parent__;
+
+  PulseaudioConfig     *config;
 
   pa_glib_mainloop     *pa_mainloop;
   pa_context           *pa_context;
@@ -118,6 +124,8 @@ pulseaudio_volume_finalize (GObject *object)
 {
   PulseaudioVolume *volume = PULSEAUDIO_VOLUME (object);
 
+  volume->config = NULL;
+
   pa_glib_mainloop_free (volume->pa_mainloop);
 
   (*G_OBJECT_CLASS (pulseaudio_volume_parent_class)->finalize) (object);
@@ -140,7 +148,7 @@ pulseaudio_volume_sink_info_cb (pa_context         *context,
   if (i == NULL) return;
 
   muted = (gboolean) i->mute;
-  vol = pulseaudio_volume_v2d (i->volume.values[0]);
+  vol = pulseaudio_volume_v2d (volume, i->volume.values[0]);
 
   if (volume->muted != muted)
     {
@@ -294,29 +302,35 @@ pulseaudio_volume_connect (PulseaudioVolume *volume)
 
 
 static gdouble
-pulseaudio_volume_v2d (pa_volume_t vol)
+pulseaudio_volume_v2d (PulseaudioVolume *volume,
+                       pa_volume_t       pa_volume)
 {
-  gdouble volume;
+  gdouble vol;
 
-  volume = (gdouble) vol - PA_VOLUME_MUTED;
-  volume /= (gdouble) (PA_VOLUME_NORM - PA_VOLUME_MUTED);
+  g_return_val_if_fail (IS_PULSEAUDIO_VOLUME (volume), 0.0);
+
+  vol = (gdouble) pa_volume - PA_VOLUME_MUTED;
+  vol /= (gdouble) (PA_VOLUME_NORM - PA_VOLUME_MUTED);
   /* for safety */
-  volume = MIN (MAX (volume, 0.0), 1.0);
-  return volume;
+  vol = MIN (MAX (vol, 0.0), 1.0);
+  return vol;
 }
 
 
 
 static pa_volume_t
-pulseaudio_volume_d2v (gdouble vol)
+pulseaudio_volume_d2v (PulseaudioVolume *volume,
+                       gdouble           vol)
 {
-  gdouble volume;
+  gdouble pa_volume;
 
-  volume = (PA_VOLUME_NORM - PA_VOLUME_MUTED) * vol;
-  volume = (pa_volume_t) volume + PA_VOLUME_MUTED;
+  g_return_val_if_fail (IS_PULSEAUDIO_VOLUME (volume), PA_VOLUME_MUTED);
+
+  pa_volume = (PA_VOLUME_NORM - PA_VOLUME_MUTED) * vol;
+  pa_volume = (pa_volume_t) pa_volume + PA_VOLUME_MUTED;
   /* for safety */
-  volume = MIN (MAX (volume, PA_VOLUME_MUTED), PA_VOLUME_NORM);
-  return volume;
+  pa_volume = MIN (MAX (pa_volume, PA_VOLUME_MUTED), PA_VOLUME_NORM);
+  return pa_volume;
 }
 
 
@@ -412,7 +426,7 @@ pulseaudio_volume_set_volume_cb2 (pa_context         *context,
   if (i == NULL) return;
 
   //pulseaudio_debug ("*** %s", pa_cvolume_snprint (st, sizeof (st), &i->volume));
-  pa_cvolume_set (&i->volume, 1, pulseaudio_volume_d2v (volume->volume));
+  pa_cvolume_set (&i->volume, 1, pulseaudio_volume_d2v (volume, volume->volume));
   pa_context_set_sink_volume_by_index (context, i->index, &i->volume, pulseaudio_volume_sink_volume_changed, volume);
 }
 
@@ -448,9 +462,14 @@ pulseaudio_volume_set_volume (PulseaudioVolume *volume,
 
 
 PulseaudioVolume *
-pulseaudio_volume_new (void)
+pulseaudio_volume_new (PulseaudioConfig *config)
 {
-  PulseaudioVolume *volume = g_object_new (TYPE_PULSEAUDIO_VOLUME, NULL);
+  PulseaudioVolume *volume;
+
+  g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), NULL);
+
+  volume = g_object_new (TYPE_PULSEAUDIO_VOLUME, NULL);
+  volume->config = config;
 
   return volume;
 }
