@@ -119,7 +119,7 @@ pulseaudio_menu_output_range_scroll (GtkWidget        *widget,
 
   scroll_event = (GdkEventScroll*)event;
 
-  new_volume = MIN (MAX (volume + (1.0 - 2.0 * scroll_event->direction) * volume_step, 0.0), 1.0);
+  new_volume = volume + (1.0 - 2.0 * scroll_event->direction) * volume_step;
   pulseaudio_volume_set_volume (menu->volume, new_volume);
   //printf ("scroll %d %g %g\n", scroll_event->direction, volume, new_volume);
 }
@@ -210,6 +210,7 @@ pulseaudio_menu_new (PulseaudioVolume *volume,
   GdkScreen      *gscreen;
   GtkWidget      *mi;
   GtkWidget      *img = NULL;
+  gdouble         volume_max;
 
   g_return_val_if_fail (IS_PULSEAUDIO_VOLUME (volume), NULL);
   g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), NULL);
@@ -232,7 +233,8 @@ pulseaudio_menu_new (PulseaudioVolume *volume,
                               G_CALLBACK (pulseaudio_menu_volume_changed), menu);
 
   /* output volume slider */
-  mi = scale_menu_item_new_with_range (0.0, 100.0, 1.0);
+  volume_max = pulseaudio_config_get_volume_max (menu->config);
+  mi = scale_menu_item_new_with_range (0.0, volume_max, 1.0);
 
   img = gtk_image_new_from_icon_name ("audio-volume-high-symbolic", GTK_ICON_SIZE_DND);
   gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (mi), img);

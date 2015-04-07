@@ -306,13 +306,16 @@ pulseaudio_volume_v2d (PulseaudioVolume *volume,
                        pa_volume_t       pa_volume)
 {
   gdouble vol;
+  gdouble vol_max;
 
   g_return_val_if_fail (IS_PULSEAUDIO_VOLUME (volume), 0.0);
+
+  vol_max = pulseaudio_config_get_volume_max (volume->config) / 100.0;
 
   vol = (gdouble) pa_volume - PA_VOLUME_MUTED;
   vol /= (gdouble) (PA_VOLUME_NORM - PA_VOLUME_MUTED);
   /* for safety */
-  vol = MIN (MAX (vol, 0.0), 1.0);
+  vol = MIN (MAX (vol, 0.0), vol_max);
   return vol;
 }
 
@@ -329,7 +332,7 @@ pulseaudio_volume_d2v (PulseaudioVolume *volume,
   pa_volume = (PA_VOLUME_NORM - PA_VOLUME_MUTED) * vol;
   pa_volume = (pa_volume_t) pa_volume + PA_VOLUME_MUTED;
   /* for safety */
-  pa_volume = MIN (MAX (pa_volume, PA_VOLUME_MUTED), PA_VOLUME_NORM);
+  pa_volume = MIN (MAX (pa_volume, PA_VOLUME_MUTED), PA_VOLUME_MAX);
   return pa_volume;
 }
 
@@ -449,12 +452,18 @@ void
 pulseaudio_volume_set_volume (PulseaudioVolume *volume,
                               gdouble           vol)
 {
+  gdouble vol_max;
+  gdouble vol_trim;
+
   g_return_if_fail (IS_PULSEAUDIO_VOLUME (volume));
   g_return_if_fail (pa_context_get_state (volume->pa_context) == PA_CONTEXT_READY);
 
-  if (volume->volume != vol)
+  vol_max = pulseaudio_config_get_volume_max (volume->config) / 100.0;
+  vol_trim = MIN (MAX (vol, 0.0), vol_max);
+
+  if (volume->volume != vol_trim)
     {
-      volume->volume = vol;
+      volume->volume = vol_trim;
       pa_context_get_server_info (volume->pa_context, pulseaudio_volume_set_volume_cb1, volume);
     }
 }

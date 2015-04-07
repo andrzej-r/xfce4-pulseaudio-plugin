@@ -402,6 +402,8 @@ scale_menu_item_new_with_range (gdouble           min,
   gtk_widget_set_size_request (priv->scale, 100, -1);
   gtk_range_set_inverted (GTK_RANGE(priv->scale), FALSE);
   gtk_scale_set_draw_value (GTK_SCALE(priv->scale), FALSE);
+  if (max > 100.0)
+    gtk_scale_add_mark (GTK_SCALE (priv->scale), 100.0, GTK_POS_BOTTOM, NULL);
 
   update_packing (scale_item);
 

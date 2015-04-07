@@ -223,13 +223,13 @@ pulseaudio_button_button_press (GtkWidget      *widget,
 static gboolean
 pulseaudio_button_scroll_event (GtkWidget *widget, GdkEventScroll *event)
 {
-  PulseaudioButton *button = PULSEAUDIO_BUTTON (widget);
-  gdouble volume =  pulseaudio_volume_get_volume (button->volume);
-  gdouble volume_step = pulseaudio_config_get_volume_step (button->config) / 100.0;
-  gdouble new_volume;
+  PulseaudioButton *button      = PULSEAUDIO_BUTTON (widget);
+  gdouble           volume      = pulseaudio_volume_get_volume (button->volume);
+  gdouble           volume_step = pulseaudio_config_get_volume_step (button->config) / 100.0;
+  gdouble           new_volume;
 
 
-  new_volume = MIN (MAX (volume + (1.0 - 2.0 * event->direction) * volume_step, 0.0), 1.0);
+  new_volume = volume + (1.0 - 2.0 * event->direction) * volume_step;
   pulseaudio_volume_set_volume (button->volume, new_volume);
   //g_debug ("dir: %d %f -> %f", event->direction, volume, new_volume);
 

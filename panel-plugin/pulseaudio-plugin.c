@@ -294,9 +294,9 @@ pulseaudio_plugin_volume_key_pressed (const char            *keystring,
   pulseaudio_debug ("%s pressed", keystring);
 
   if (strcmp (keystring, PULSEAUDIO_PLUGIN_RAISE_VOLUME_KEY) == 0)
-    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume + volume_step, 0.0), 1.0));
+    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, volume + volume_step);
   else if (strcmp (keystring, PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY) == 0)
-    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (MAX (volume - volume_step, 0.0), 1.0));
+    pulseaudio_volume_set_volume (pulseaudio_plugin->volume, volume - volume_step);
 }
 
 
