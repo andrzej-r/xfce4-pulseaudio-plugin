@@ -261,7 +261,7 @@ pulseaudio_config_get_enable_keyboard_shortcuts (PulseaudioConfig *config)
 guint
 pulseaudio_config_get_volume_step (PulseaudioConfig *config)
 {
-  g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), DEFAULT_ENABLE_KEYBOARD_SHORTCUTS);
+  g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), DEFAULT_VOLUME_STEP);
 
   return config->volume_step;
 }
