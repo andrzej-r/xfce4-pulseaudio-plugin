@@ -47,6 +47,7 @@
 
 #define DEFAULT_ENABLE_KEYBOARD_SHORTCUTS         TRUE
 #define DEFAULT_VOLUME_STEP                       6
+#define DEFAULT_VOLUME_MAX                        153
 
 
 
@@ -73,6 +74,7 @@ struct _PulseaudioConfig
 
   gboolean         enable_keyboard_shortcuts;
   guint            volume_step;
+  guint            volume_max;
   gchar           *mixer_command;
 };
 
@@ -83,6 +85,7 @@ enum
     PROP_0,
     PROP_ENABLE_KEYBOARD_SHORTCUTS,
     PROP_VOLUME_STEP,
+    PROP_VOLUME_MAX,
     PROP_MIXER_COMMAND,
     N_PROPERTIES,
   };
@@ -129,6 +132,15 @@ pulseaudio_config_class_init (PulseaudioConfigClass *klass)
 
 
   g_object_class_install_property (gobject_class,
+                                   PROP_VOLUME_MAX,
+                                   g_param_spec_uint ("volume-max", NULL, NULL,
+                                                      1, 300, DEFAULT_VOLUME_MAX,
+                                                      G_PARAM_READWRITE |
+                                                      G_PARAM_STATIC_STRINGS));
+
+
+
+  g_object_class_install_property (gobject_class,
                                    PROP_MIXER_COMMAND,
                                    g_param_spec_string ("mixer-command",
                                                         NULL, NULL,
@@ -153,6 +165,7 @@ pulseaudio_config_init (PulseaudioConfig *config)
 {
   config->enable_keyboard_shortcuts = DEFAULT_ENABLE_KEYBOARD_SHORTCUTS;
   config->volume_step               = DEFAULT_VOLUME_STEP;
+  config->volume_max                = DEFAULT_VOLUME_MAX;
   config->mixer_command             = g_strdup (DEFAULT_MIXER_COMMAND);
 }
 
@@ -187,6 +200,10 @@ pulseaudio_config_get_property (GObject    *object,
 
     case PROP_VOLUME_STEP:
       g_value_set_uint (value, config->volume_step);
+      break;
+
+    case PROP_VOLUME_MAX:
+      g_value_set_uint (value, config->volume_max);
       break;
 
     case PROP_MIXER_COMMAND:
@@ -233,6 +250,16 @@ pulseaudio_config_set_property (GObject      *object,
         }
       break;
 
+    case PROP_VOLUME_MAX:
+      val_uint = g_value_get_uint (value);
+      if (config->volume_max != val_uint)
+        {
+          config->volume_max = val_uint;
+          g_object_notify (G_OBJECT (config), "volume-max");
+          g_signal_emit (G_OBJECT (config), pulseaudio_config_signals [CONFIGURATION_CHANGED], 0);
+        }
+      break;
+
     case PROP_MIXER_COMMAND:
       g_free (config->mixer_command);
       config->mixer_command = g_value_dup_string (value);
@@ -269,6 +296,17 @@ pulseaudio_config_get_volume_step (PulseaudioConfig *config)
 
 
 
+guint
+pulseaudio_config_get_volume_max (PulseaudioConfig *config)
+{
+  g_return_val_if_fail (IS_PULSEAUDIO_CONFIG (config), DEFAULT_VOLUME_MAX);
+
+  return config->volume_max;
+}
+
+
+
+
 const gchar *
 pulseaudio_config_get_mixer_command (PulseaudioConfig *config)
 {
@@ -299,6 +337,10 @@ pulseaudio_config_new (const gchar     *property_base)
 
       property = g_strconcat (property_base, "/volume-step", NULL);
       xfconf_g_property_bind (channel, property, G_TYPE_UINT, config, "volume-step");
+      g_free (property);
+
+      property = g_strconcat (property_base, "/volume-max", NULL);
+      xfconf_g_property_bind (channel, property, G_TYPE_UINT, config, "volume-max");
       g_free (property);
 
       property = g_strconcat (property_base, "/mixer-command", NULL);
