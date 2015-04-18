@@ -229,7 +229,13 @@ pulseaudio_button_scroll_event (GtkWidget *widget, GdkEventScroll *event)
   gdouble           new_volume;
 
 
-  new_volume = volume + (1.0 - 2.0 * event->direction) * volume_step;
+  if (event->direction == 1) // decrease volume
+    new_volume = volume - volume_step;
+  else if (event->direction == 0) // increase volume
+    new_volume = MIN (volume + volume_step, MAX (volume, 1.0));
+  else
+    new_volume = volume;
+
   pulseaudio_volume_set_volume (button->volume, new_volume);
   //g_debug ("dir: %d %f -> %f", event->direction, volume, new_volume);
 
