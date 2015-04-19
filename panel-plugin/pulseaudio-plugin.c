@@ -196,6 +196,8 @@ pulseaudio_plugin_show_about (XfcePanelPlugin *plugin)
     {
       "Andrzej Radecki <ndrwrdck@gmail.com>",
       "Guido Berhoerster <guido+xfce@berhoerster.name>",
+      "Simon Steinbeiss <simon@xfce.org>",
+      "Steve Dodier-Lazaro <sidi@xfce.org>",
       NULL
     };
 

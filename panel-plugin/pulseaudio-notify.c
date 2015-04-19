@@ -1,4 +1,5 @@
-/*  Copyright (c) 2015 Andrzej <ndrwrdck@gmail.com>
+/*  Copyright (c) 2009-2015 Steve Dodier-Lazaro <sidi@xfce.org>
+ *  Copyright (c) 2015      Andrzej <ndrwrdck@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -118,6 +119,7 @@ pulseaudio_notify_init (PulseaudioNotify *notify)
       g_list_free (caps_list);
     }
   notify->notification = notify_notification_new ("xfce4-pulseaudio-plugin", NULL, NULL);
+  notify_notification_set_timeout (notify->notification, 1500);
 }
 
 
