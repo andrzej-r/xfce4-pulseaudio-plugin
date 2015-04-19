@@ -35,6 +35,8 @@ libpulseaudio_plugin_la_SOURCES = \
 	pulseaudio-dialog.h \
 	pulseaudio-menu.c \
 	pulseaudio-menu.h \
+	pulseaudio-notify.c \
+	pulseaudio-notify.h \
 	scalemenuitem.c \
 	scalemenuitem.h
 
@@ -48,6 +50,7 @@ libpulseaudio_plugin_la_CFLAGS = \
 	$(LIBXFCE4PANEL_CFLAGS) \
 	$(XFCONF_CFLAGS) \
 	$(KEYBINDER_CFLAGS) \
+	$(LIBNOTIFY_CFLAGS) \
 	$(PLATFORM_CFLAGS)
 
 libpulseaudio_plugin_la_LDFLAGS = \
@@ -66,6 +69,7 @@ libpulseaudio_plugin_la_LIBADD = \
 	$(LIBXFCE4PANEL_LIBS) \
 	$(XFCONF_LIBS) \
 	$(KEYBINDER_LIBS) \
+	$(LIBNOTIFY_LIBS) \
 	$(LIBM)
 
 #

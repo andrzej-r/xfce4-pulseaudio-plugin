@@ -37,6 +37,8 @@ GType pulseaudio_plugin_get_type      (void) G_GNUC_CONST;
 
 void  pulseaudio_plugin_register_type (XfcePanelTypeModule *type_module);
 
+void  pulseaudio_notify               (PulseaudioPlugin    *pulseaudio_plugin);
+
 G_END_DECLS
 
 #endif /* !__PULSEAUDIO_PLUGIN_H__ */

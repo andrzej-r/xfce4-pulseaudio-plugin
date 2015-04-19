@@ -41,6 +41,7 @@
 #include "pulseaudio-volume.h"
 #include "pulseaudio-button.h"
 #include "pulseaudio-dialog.h"
+#include "pulseaudio-notify.h"
 
 #ifdef HAVE_IDO
 #include <libido/libido.h>
@@ -89,6 +90,9 @@ struct _PulseaudioPlugin
 
   PulseaudioConfig    *config;
   PulseaudioVolume    *volume;
+#ifdef HAVE_LIBNOTIFY
+  PulseaudioNotify    *notify;
+#endif
 
   /* panel widgets */
   GtkWidget           *button;
@@ -130,6 +134,9 @@ pulseaudio_plugin_init (PulseaudioPlugin *pulseaudio_plugin)
 
   pulseaudio_plugin->volume            = NULL;
   pulseaudio_plugin->button            = NULL;
+#ifdef HAVE_LIBNOTIFY
+  pulseaudio_plugin->notify            = NULL;
+#endif
 }
 
 
@@ -297,6 +304,7 @@ pulseaudio_plugin_volume_key_pressed (const char            *keystring,
     pulseaudio_volume_set_volume (pulseaudio_plugin->volume, MIN (volume + volume_step, MAX (volume, 1.0)));
   else if (strcmp (keystring, PULSEAUDIO_PLUGIN_LOWER_VOLUME_KEY) == 0)
     pulseaudio_volume_set_volume (pulseaudio_plugin->volume, volume - volume_step);
+  pulseaudio_notify (pulseaudio_plugin);
 }
 
 
@@ -309,8 +317,19 @@ pulseaudio_plugin_mute_pressed (const char            *keystring,
   pulseaudio_debug ("%s pressed", keystring);
 
   pulseaudio_volume_toggle_muted (pulseaudio_plugin->volume);
+  pulseaudio_notify (pulseaudio_plugin);
 }
 #endif
+
+
+void
+pulseaudio_notify (PulseaudioPlugin *pulseaudio_plugin)
+{
+#ifdef HAVE_LIBNOTIFY
+  pulseaudio_notify_notify (pulseaudio_plugin->notify);
+#endif
+}
+
 
 
 static void
@@ -349,6 +368,12 @@ pulseaudio_plugin_construct (XfcePanelPlugin *plugin)
 
   /* volume controller */
   pulseaudio_plugin->volume = pulseaudio_volume_new (pulseaudio_plugin->config);
+
+  /* initialize notify wrapper */
+#ifdef HAVE_LIBNOTIFY
+  pulseaudio_plugin->notify = pulseaudio_notify_new (pulseaudio_plugin->config,
+                                                     pulseaudio_plugin->volume);
+#endif
 
   /* instantiate a button box */
   pulseaudio_plugin->button = pulseaudio_button_new (pulseaudio_plugin,

@@ -90,6 +90,12 @@ dnl **********************************
 XDT_CHECK_OPTIONAL_PACKAGE([KEYBINDER], [keybinder-3.0], [0.2.2], [keybinder],
                            [keybinder Support])
 
+dnl **********************************
+dnl *** Optional libnotify Support ***
+dnl **********************************
+XDT_CHECK_OPTIONAL_PACKAGE([LIBNOTIFY], [libnotify], [0.7.0], [libnotify],
+                           [libnotify library])
+
 AC_CHECK_LIBM
 AC_SUBST(LIBM)
 
@@ -140,5 +146,6 @@ echo "Build Configuration:"
 echo
 echo "* Debug Support:          $enable_debug"
 echo "* Use keybinder:          ${KEYBINDER_FOUND:-no}"
+echo "* Use libnotify:          ${LIBNOTIFY_FOUND:-no}"
 echo "* Default Mixer command:  $DEFAULT_MIXER_COMMAND"
 echo

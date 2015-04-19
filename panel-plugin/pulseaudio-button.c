@@ -239,6 +239,8 @@ pulseaudio_button_scroll_event (GtkWidget *widget, GdkEventScroll *event)
   pulseaudio_volume_set_volume (button->volume, new_volume);
   //g_debug ("dir: %d %f -> %f", event->direction, volume, new_volume);
 
+  pulseaudio_notify (button->plugin);
+
   return TRUE;
 }
 
