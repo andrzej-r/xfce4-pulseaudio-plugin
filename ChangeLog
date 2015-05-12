@@ -1,4 +1,14 @@
 # created with git log --pretty=format:"%ad %h %s %aN <%aE>" --no-merges --date=short
+2015-05-12 7cfc9a3 make distcheck fix Andrzej <ndrwrdck@gmail.com>
+2015-04-19 405f94a Corrected copyright and author list Andrzej <ndrwrdck@gmail.com>
+2015-04-19 f4b6b6c Added OSD notifications Andrzej <ndrwrdck@gmail.com>
+2015-04-18 18ef95f Do not increase volume beyond 100% when using keyboard or mouse scroll Andrzej <ndrwrdck@gmail.com>
+2015-04-07 cd06756 Limit volume to newly introduced volume-max rather than to 100% Andrzej <ndrwrdck@gmail.com>
+2015-04-07 e3f8abf Added a volume_max xfconf property Andrzej <ndrwrdck@gmail.com>
+2015-04-07 67e4394 Fixed an incorrect constant in debugging code Andrzej <ndrwrdck@gmail.com>
+2015-04-06 af38716 Allow volume object use plugin settings. Andrzej <ndrwrdck@gmail.com>
+2015-03-26 45d2d85 Back to development Andrzej <ndrwrdck@gmail.com>
+2015-03-26 4c20235 Updates for a release Andrzej <ndrwrdck@gmail.com>
 2015-03-26 3f7b531 Updated po/Makefile.in.in Andrzej <ndrwrdck@gmail.com>
 2015-03-21 d545681 Create new icon for the plugin Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
 2015-03-21 7b2057f Install the audio volume icons in hicolor Simon Steinbeiss <simon.steinbeiss@elfenbeinturm.at>
