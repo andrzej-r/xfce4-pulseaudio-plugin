@@ -6,3 +6,4 @@ panel-plugin/pulseaudio-dialog.c
 panel-plugin/pulseaudio-button.c
 panel-plugin/pulseaudio-volume.c
 panel-plugin/pulseaudio-menu.c
+panel-plugin/pulseaudio-notify.c
